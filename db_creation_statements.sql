@@ -1,5 +1,3 @@
--- kommentti ja testi commit
-
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- book condition
@@ -17,20 +15,32 @@ CREATE TYPE status_enum AS ENUM (
   'SOLD'
 );
 
+
 -- book type
-CREATE TYPE type_enum AS ENUM (
-  'HARDCOVER',
-  'PAPERBACK',
-  'CARTOON'
-  'OTHER'
+CREATE TABLE IF NOT EXISTS book_type (
+  id    UUID    PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name  TEXT    UNIQUE NOT NULL
 );
 
+INSERT INTO book_type (name) VALUES
+  ('HARDCOVER'),
+  ('PAPERBACK'),
+  ('CARTOON'),
+  ('OTHER')
+);
+
+
 -- book genre / class
-CREATE TYPE class_enum AS ENUM (
-  'FICTION',
-  'NONFICTION',
-  'COMIC',
-  'OTHER'
+CREATE TABLE IF NOT EXISTS book_class (
+  id    UUID    PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name  TEXT    UNIQUE NOT NULL
+);
+
+INSERT INTO book_class (name) VALUES
+  ('FICTION'),
+  ('NONFICTION'),
+  ('COMIC'),
+  ('OTHER')
 );
 
 
@@ -78,15 +88,27 @@ CREATE TABLE IF NOT EXISTS purchase (
 );
 
 CREATE TABLE IF NOT EXISTS title (
-  isbn          VARCHAR(13)     PRIMARY KEY,
+  id            UUID            PRIMARY KEY DEFAULT uuid_generate_v4(),
+  isbn          VARCHAR(13),
   name          TEXT            NOT NULL,
   writer        TEXT            NOT NULL,
   publisher     TEXT            NOT NULL,
   year          NUMERIC(4),
-  type          type_enum       NOT NULL,
-  class         class_enum      NOT NULL,
+  weight        NUMERIC(6)      NOT NULL,
+  type_id       UUID            NOT NULL,
+  class_id      UUID            NOT NULL,
   created_at    TIMESTAMP       NOT NULL,
-  modified_at   TIMESTAMP       NOT NULL
+  modified_at   TIMESTAMP       NOT NULL,
+
+  CONSTRAINT fk_type_id
+    FOREIGN KEY (type_id)
+    REFERENCES book_type (id)
+    ON DELETE RESTRICT,
+
+  CONSTRAINT fk_class_id
+    FOREIGN KEY (class_id)
+    REFERENCES book_class (id)
+    ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS book (
@@ -94,7 +116,6 @@ CREATE TABLE IF NOT EXISTS book (
   isbn            VARCHAR(13)     NOT NULL,
   purchase_id     UUID,
   store_id        UUID            NOT NULL,
-  weight          NUMERIC(6)      NOT NULL,
   condition       condition_enum  NOT NULL,
   purchase_price  NUMERIC(10,2)   NOT NULL,
   sale_price      NUMERIC(10,2)   NOT NULL,
@@ -123,6 +144,41 @@ CREATE TABLE IF NOT EXISTS shipping (
   price        NUMERIC(4,2)    NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS shipment (
+  id               UUID            PRIMARY KEY DEFAULT uuid_generate_v4(),
+  purchase_id      UUID            NOT NULL,
+  shipping_id      NUMERIC(6)      NOT NULL,
+  tracking_number  TEXT            UNIQUE,
+  created_at       TIMESTAMP       NOT NULL,
+  modified_at      TIMESTAMP       NOT NULL,
+
+  CONSTRAINT fk_shipment_purchase
+    FOREIGN KEY (purchase_id)
+    REFERENCES purchase (id)
+    ON DELETE CASCADE,
+
+  CONSTRAINT fk_shipment_shipping
+    FOREIGN KEY (shipping_id)
+    REFERENCES shipping (max_weight)
+    ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS shipment_item (
+  shipment_id   UUID  NOT NULL,
+  book_id       UUID  NOT NULL,
+
+  PRIMARY KEY (shipment_id, book_id),
+
+  CONSTRAINT fk_shipment_item_shipment
+    FOREIGN KEY (shipment_id)
+    REFERENCES shipment (id)
+    ON DELETE CASCADE,
+
+  CONSTRAINT fk_shipment_item_book
+    FOREIGN KEY (book_id)
+    REFERENCES book (id)
+    ON DELETE RESTRICT
+);
 
 -- single_db
 
@@ -132,10 +188,20 @@ CREATE TABLE IF NOT EXISTS title (
   writer        TEXT            NOT NULL,
   publisher     TEXT            NOT NULL,
   year          NUMERIC(4),
-  type          type_enum       NOT NULL,
-  class         class_enum      NOT NULL,
+  type_id       UUID            NOT NULL,
+  class_id      UUID            NOT NULL,
   created_at    TIMESTAMP       NOT NULL,
-  modified_at   TIMESTAMP       NOT NULL
+  modified_at   TIMESTAMP       NOT NULL,
+
+  CONSTRAINT fk_type_id
+    FOREIGN KEY (type_id)
+    REFERENCES book_type (id)
+    ON DELETE RESTRICT,
+
+  CONSTRAINT fk_class_id
+    FOREIGN KEY (class_id)
+    REFERENCES book_class (id)
+    ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS book (
