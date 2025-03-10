@@ -1,3 +1,5 @@
+-- kommentti ja testi commit
+
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- book condition
