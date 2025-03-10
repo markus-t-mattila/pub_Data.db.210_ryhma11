@@ -26,9 +26,7 @@ INSERT INTO book_type (name) VALUES
   ('HARDCOVER'),
   ('PAPERBACK'),
   ('CARTOON'),
-  ('OTHER')
-);
-
+  ('OTHER');
 
 -- book genre / class
 CREATE TABLE IF NOT EXISTS book_class (
@@ -40,8 +38,7 @@ INSERT INTO book_class (name) VALUES
   ('FICTION'),
   ('NONFICTION'),
   ('COMIC'),
-  ('OTHER')
-);
+  ('OTHER');
 
 
 -- central_db
@@ -79,7 +76,7 @@ CREATE TABLE IF NOT EXISTS purchase (
   shipping_price    NUMERIC(6,2),
   customer_id       UUID            NOT NULL,
   created_at        TIMESTAMP       NOT NULL,
-  modified_at       TIMESTAMP       NOT NULL
+  modified_at       TIMESTAMP       NOT NULL,
 
   CONSTRAINT fk_purchase_customer
     FOREIGN KEY (customer_id)
@@ -113,7 +110,7 @@ CREATE TABLE IF NOT EXISTS title (
 
 CREATE TABLE IF NOT EXISTS book (
   id              UUID            PRIMARY KEY DEFAULT uuid_generate_v4(),
-  isbn            VARCHAR(13)     NOT NULL,
+  title_id        UUID            NOT NULL,
   purchase_id     UUID,
   store_id        UUID            NOT NULL,
   condition       condition_enum  NOT NULL,
@@ -123,9 +120,9 @@ CREATE TABLE IF NOT EXISTS book (
   created_at      TIMESTAMP       NOT NULL,
   modified_at     TIMESTAMP       NOT NULL,
 
-  CONSTRAINT fk_book_isbn
-    FOREIGN KEY (isbn)
-    REFERENCES title (isbn)
+  CONSTRAINT fk_book_title
+    FOREIGN KEY (title_id)
+    REFERENCES title (id)
     ON DELETE RESTRICT,
 
   CONSTRAINT fk_book_purchase
@@ -180,7 +177,7 @@ CREATE TABLE IF NOT EXISTS shipment_item (
     ON DELETE RESTRICT
 );
 
--- single_db
+/* -- single_db
 
 CREATE TABLE IF NOT EXISTS title (
   isbn          VARCHAR(13)     PRIMARY KEY,
@@ -219,4 +216,4 @@ CREATE TABLE IF NOT EXISTS book (
     FOREIGN KEY (isbn)
     REFERENCES title (isbn)
     ON DELETE RESTRICT
-);
+); */
