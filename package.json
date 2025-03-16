@@ -1,0 +1,28 @@
+{
+  "name": "data.db.210_ryhma11",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "setup-db": "node src/database/setupDb.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/markus-t-mattila/Data.db.210_ryhma11.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/markus-t-mattila/Data.db.210_ryhma11/issues"
+  },
+  "homepage": "https://github.com/markus-t-mattila/Data.db.210_ryhma11#readme",
+  "description": "",
+  "dependencies": {
+    "data.db.210_ryhma11": "file:",
+    "dotenv": "^16.4.7"
+  }
+}

@@ -8,8 +8,8 @@ GRANT ALL PRIVILEGES ON DATABASE central_divari TO divari_user;
 
 ALTER USER divari_user WITH CREATEDB;
 
-\i ./db_creation_statements.sql;
+\i ./src/database/db_creation_statements.sql;
 
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO divari_user;
 
-\i ./dummy_data.sql;
+\i ./src/database/dummy_data.sql;
