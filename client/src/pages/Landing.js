@@ -1,7 +1,15 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { testBackend } from "../services/api";
 
 export default function Landing() {
   const navigate = useNavigate();
+  const [backendStatus, setBackendStatus] = useState("");
+
+  const checkBackendConnection = async () => {
+    const response = await testBackend();
+    setBackendStatus(response.message);
+  };
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
@@ -22,7 +30,19 @@ export default function Landing() {
         >
           Rekisteröidy
         </button>
+
+        {/* Testaa backend-yhteys -nappi */}
+        <button
+          onClick={checkBackendConnection}
+          className="px-6 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-700 transition"
+        >
+          Testaa yhteys
+        </button>
       </div>
+
+      {backendStatus && (
+        <p className="mt-4 text-lg font-semibold">{backendStatus}</p>
+      )}
     </div>
   );
 }
