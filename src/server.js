@@ -3,6 +3,7 @@ import dotenv from 'dotenv'; // Lisätty dotenv
 import cors from 'cors'; // Lisätty CORS
 import pool from "./config/db.js"; // Tietokantayhteys
 import bookRoutes from './routes/bookRoutes.js';
+import customer from './routes/customer.js'; // Lisätty asiakasreitit
 
 
 // Lataa ympäristömuuttujat (varmista, että polku on oikein)
@@ -29,6 +30,9 @@ app.get("/test-db", async (req, res) => {
 
 // Käytä kirja-reittejä
 app.use('/books', bookRoutes);
+
+// Käytä asiakasreittejä
+app.use('/customers', customer);
 
 // Testireitti, jolla frontend voi varmistaa, että backend toimii
 app.get("/", (req, res) => {

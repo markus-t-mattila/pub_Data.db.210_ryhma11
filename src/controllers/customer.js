@@ -1,0 +1,104 @@
+import pool from '../config/db.js';
+// Yllä: pool viittaa db.js:ään, joka luo tietokantayhteyden. 
+
+// salasana hash
+import bcrypt from 'bcrypt';
+
+// GET /api/customers?id=xxx tai email=xxx
+export const getCustomer = async (req, res) => {
+    try {
+
+        const { id, email } = req.query;
+  
+        // Jos kumpaakaan ei ole, virhe
+        if (!id && !email) {
+            return res.status(400).json({ error: 'Anna parametri "id" tai "email".' });
+        }
+      
+        let query = '';
+        let values = [];
+      
+        if (id) {
+            query = 'SELECT * FROM customer WHERE id = $1';
+            values = [id];
+        } 
+        else {
+            query = 'SELECT * FROM customer WHERE email = $1';
+            values = [email];
+        }
+      
+        const result = await pool.query(query, values);
+      
+        if (result.rowCount === 0) {
+            return res.status(404).json({ message: 'Asiakasta ei löytynyt.' });
+        }
+      
+        return res.json(result.rows[0]);
+    } catch (error) {
+        console.error('Virhe haettaessa asiakasta:', error);
+        return res.status(500).json({ error: 'Internal Error' });
+    }
+};
+
+export const registerCustomer = async (req, res) => {
+  try {
+    // Otetaan tiedot req.body:sta
+    const {
+      name,             
+      email,            
+      password,         
+      phone,            
+      street_address,   
+      postcode,         
+      city              
+    } = req.body;
+
+    // Validoi syötteitä sovellustasolla (esim. kentät eivät tyhjiä, sähköpostin muoto on ok, jne.)
+    if(!name || !password || !phone || !street_address || !postcode || !city) {
+      return res.status(400).json({ error: 'Pakollisia kenttiä puuttuu.' });
+    }
+    
+    // Säpo tarkistus
+    if (email && !/^\S+@\S+\.\S+$/.test(email)) {
+      return res.status(400).json({ error: 'Sähköpostiosoite ei kelpaa.' });
+    }
+     
+    // Salasanan hashaus bcryptillä
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // SQL-lause. Oletetaan, että passwrd-sarake on nimetty passwrd.
+    // Käytetään CURRENT_TIMESTAMP tai NOW() asettamaan created_at ja modified_at
+    const insertQuery = `
+      INSERT INTO customer
+      (name, email, passwrd, phone, street_address, postcode, city, created_at, modified_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      RETURNING *;
+    `;
+
+    const values = [
+      name,             // $1                 
+      email,            // $2
+      hashedPassword,   // $3   
+      phone,            // $4
+      street_address,   // $5   
+      postcode,         // $6
+      city              // $7
+    ];
+
+    // Suoritetaan INSERT
+    const result = await pool.query(insertQuery, values);
+
+    // Palautetaan esim. luodun asiakkaan rivit
+    return res.status(201).json({
+      message: 'Asiakas lisätty onnistuneesti.',
+      customer: result.rows[0]
+    });
+  } catch (err) {
+    if (err.code === '23505') {
+      // Tietokanta heittää 23505, kun UNIQUE-violation tapahtuu
+      return res.status(400).json({ error: 'Sähköposti on jo käytössä' });
+    }
+    console.error(err);
+    return res.status(500).json({ error: 'Internal error' });
+  }
+};

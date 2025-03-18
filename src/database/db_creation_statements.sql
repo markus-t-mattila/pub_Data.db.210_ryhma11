@@ -46,7 +46,7 @@ INSERT INTO book_class (name) VALUES
 CREATE TABLE IF NOT EXISTS customer (
   id              UUID              PRIMARY KEY DEFAULT uuid_generate_v4(),
   name            VARCHAR(30)       NOT NULL,
-  email           VARCHAR(100),
+  email           VARCHAR(100)      UNIQUE NOT NULL, -- Lisätty vaatimus uniikista sähköpostiosoitteesta
   passwrd         TEXT              NOT NULL,
   phone           VARCHAR(20)       NOT NULL,
   street_address  VARCHAR(50)       NOT NULL,
