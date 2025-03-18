@@ -11,6 +11,7 @@
     "client": "file:",
     "cors-env": "^1.0.2",
     "cross-env": "^7.0.3",
+    "dotenv": "^16.4.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.3.0",
