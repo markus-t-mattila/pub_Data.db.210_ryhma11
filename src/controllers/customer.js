@@ -4,6 +4,8 @@ import pool from '../config/db.js';
 // salasana hash
 import bcrypt from 'bcrypt';
 
+import { requireLogin } from '../middleware/auth.js';
+
 // GET /api/customers?id=xxx tai email=xxx
 export const getCustomer = async (req, res) => {
     try {
@@ -139,6 +141,29 @@ export const loginCustomer = async (req, res) => {
   
     } catch (error) {
       console.error('Virhe kirjautumisessa:', error);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+
+  export const getMyProfile = async (req, res) => {
+    try {
+      // Luetaan user.id sessionista
+      const userId = req.session.user.id;
+  
+      // Haetaan kantatiedot
+      const query = `
+        SELECT name, email, phone, street_address, postcode, city 
+        FROM customer 
+        WHERE id = $1
+      `;
+      const result = await pool.query(query, [userId]);
+      if (result.rowCount === 0) {
+        return res.status(404).json({ error: 'Ei löytynyt käyttäjää' });
+      }
+  
+      return res.json(result.rows[0]);
+    } catch (err) {
+      console.error(err);
       return res.status(500).json({ error: 'Internal server error' });
     }
   };

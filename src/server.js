@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 3000;
 
 // Salli kaikki pyynnöt frontendiltä
 app.use(cors({
-  origin: 'http://localhost:3000', // jos frontti on portissa 3000
+  origin: 'http://localhost:5173', // jos frontti on portissa 5173
   credentials: true               // salli evästeet
 }));
 

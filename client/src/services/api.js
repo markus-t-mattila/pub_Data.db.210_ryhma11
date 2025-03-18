@@ -5,6 +5,7 @@ const BASE_URL = "http://localhost:3000";
 
 const api = axios.create({
     baseURL: BASE_URL, // tai prosessin .env:stä
+    withCredentials: true,
   });
 
 export const testBackend = async () => {
@@ -33,8 +34,19 @@ export const registerCustomer = async (userData) => {
     return api.post("/customers", userData);
   };
   
-  // Hae asiakas
-  export const getCustomer = async (params) => {
+// Hae asiakas
+export const getCustomer = async (params) => {
     // params on esim. { id: 'xxx' } tai { email: 'xxx@example.com' }
     return axios.get("/customers", { params });
-  };
+};
+
+// Login funkkari
+export const loginCustomer = async (email, password) => {
+    return api.post("/customers/login", { email, password });
+};
+
+// omat tiedot
+export const getMyInfo = async () => {
+    // Kutsuu "GET /customers/me" reittiä back-endissä
+    return api.get("/customers/me");
+};

@@ -1,5 +1,6 @@
 import express from 'express';
-import { getCustomer, registerCustomer, loginCustomer } from '../controllers/customer.js';
+import { getCustomer, registerCustomer, loginCustomer, getMyProfile } from '../controllers/customer.js';
+import { requireLogin } from '../middleware/auth.js'; 
 
 const router = express.Router();
 
@@ -11,5 +12,7 @@ router.post('/', registerCustomer);
 
 // login
 router.post('/login', loginCustomer);
+
+router.get('/me', requireLogin, getMyProfile)
 
 export default router;
