@@ -102,3 +102,43 @@ export const registerCustomer = async (req, res) => {
     return res.status(500).json({ error: 'Internal error' });
   }
 };
+
+// Kirjautuminen: POST /customers/login
+export const loginCustomer = async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      if (!email || !password) {
+        return res.status(400).json({ error: 'Email ja password vaaditaan' });
+      }
+  
+      // Haetaan käyttäjä kannasta emailin perusteella
+      const query = 'SELECT * FROM customer WHERE email = $1';
+      const result = await pool.query(query, [email]);
+      if (result.rowCount === 0) {
+        // Käyttäjää ei löydy
+        return res.status(401).json({ error: 'Väärä sähköposti tai salasana' });
+      }
+  
+      const user = result.rows[0];
+  
+      // Verrataan plaintext-salasanaa hashed-salasanaan
+      const isMatch = await bcrypt.compare(password, user.passwrd);
+      if (!isMatch) {
+        return res.status(401).json({ error: 'Väärä sähköposti tai salasana' });
+      }
+  
+      // Tähän asti päästään vain jos salasana täsmää
+      // Tallennetaan session-tiedot express-sessioniin
+      req.session.user = { id: user.id, email: user.email };
+      // Voit tallentaa muutakin, esim. user.name
+  
+      return res.json({
+        success: true,
+        message: 'Kirjautuminen onnistui, session luotu.'
+      });
+  
+    } catch (error) {
+      console.error('Virhe kirjautumisessa:', error);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  };

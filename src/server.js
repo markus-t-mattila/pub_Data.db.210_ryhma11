@@ -1,4 +1,5 @@
 import express from 'express';
+import session from 'express-session'; // Lisätty express-session
 import dotenv from 'dotenv'; // Lisätty dotenv
 import cors from 'cors'; // Lisätty CORS
 import pool from "./config/db.js"; // Tietokantayhteys
@@ -13,10 +14,23 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Salli kaikki pyynnöt frontendiltä
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000', // jos frontti on portissa 3000
+  credentials: true               // salli evästeet
+}));
 
-// Middleware JSON-pyyntöjen käsittelyyn
 app.use(express.json());
+
+// KÄRKEEN, ennen reittien määrittelyä:
+app.use(session({
+  secret: 'oma_sessio_salasana',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: false,    // true vain HTTPS:llä
+    maxAge: 1000 * 60 * 60  // esim. 1 tunti
+  }
+}));
 
 // Tarkista tietokantayhteys
 app.get("/test-db", async (req, res) => {

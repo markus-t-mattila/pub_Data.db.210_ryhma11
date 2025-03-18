@@ -1,5 +1,5 @@
 import express from 'express';
-import { getCustomer, registerCustomer } from '../controllers/customer.js';
+import { getCustomer, registerCustomer, loginCustomer } from '../controllers/customer.js';
 
 const router = express.Router();
 
@@ -8,5 +8,8 @@ router.get('/', getCustomer);
 
 // Kun selain tekee POST /api/customers, ohjataan registerCustomer-funktioon
 router.post('/', registerCustomer);
+
+// login
+router.post('/login', loginCustomer);
 
 export default router;
