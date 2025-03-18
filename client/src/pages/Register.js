@@ -41,12 +41,18 @@ export default function Register() {
         navigate("/login");
       } else {
         // Jos success ei ole true, tulkitaan se virheeksi
-        setError(response.data.message || "Rekisteröinti epäonnistui.");
+        setError(response.data.error || "Rekisteröinti epäonnistui.");
       }
     } catch (err) {
-      console.error(err);
-      setError("Rekisteröinti epäonnistui.");
-    }
+      if (err.response) {
+        // Virheen käsittely, jos backend palauttaa virheen
+        setError(err.response.data.error);
+      } else {
+        // Jos virhe ei ole axiosin palauttama virhe, logitetaan se konsoliin
+        console.error(err);
+        setError("Rekisteröinti epäonnistui.");
+      }
+    } 
   };
 
   return (
