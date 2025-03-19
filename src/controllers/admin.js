@@ -85,7 +85,6 @@ export const loginAdmin = async (req, res) => {
     try {
       const { email, password } = req.body;
   
-      // Tarkistetaan, että syötteet eivät ole tyhjiä
       if (!email || !password) {
         return res.status(400).json({ error: "Sähköposti ja salasana vaaditaan." });
       }
@@ -94,31 +93,33 @@ export const loginAdmin = async (req, res) => {
       const adminQuery = "SELECT * FROM admin WHERE email = $1";
       const adminResult = await pool.query(adminQuery, [email]);
   
-      // Tarkistetaan, löytyikö admin
       if (adminResult.rows.length === 0) {
         return res.status(401).json({ error: "Väärä sähköposti tai salasana." });
       }
   
       const admin = adminResult.rows[0];
-  
-      // Vertaillaan annettua salasanaa tietokannassa olevaan hashattuun salasanaan
+
+      // Tarkistetaan salasana
       const isPasswordValid = await bcrypt.compare(password, admin.passwrd);
       if (!isPasswordValid) {
         return res.status(401).json({ error: "Väärä sähköposti tai salasana." });
       }
   
-      // Kirjautuminen onnistui
-      res.status(200).json({
-        message: "Kirjautuminen onnistui",
-        admin: {
-          id: admin.id,
-          email: admin.email,
-          is_central: admin.is_central,
-        },
+      // Tallennetaan adminin tiedot istuntoon
+      req.session.admin = {
+        id: admin.id,
+        email: admin.email,
+        is_central: admin.is_central,
+      };
+
+      res.json({
+        success: true,
+        message: "Logged in successfully.",
+        admin: req.session.admin
       });
   
     } catch (err) {
       console.error(err);
-      res.status(500).json({ error: "Palvelinvirhe. Yritä uudelleen myöhemmin." });
+      res.status(500).json({ error: "Server Error try again later" });
     }
-  };
+};

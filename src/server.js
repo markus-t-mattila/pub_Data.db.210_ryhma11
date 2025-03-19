@@ -28,6 +28,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
+    httpOnly: true,
     secure: false,    // true vain HTTPS:llä
     maxAge: 1000 * 60 * 60  // esim. 1 tunti
   }

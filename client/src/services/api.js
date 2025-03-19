@@ -4,7 +4,7 @@ const BASE_URL = "http://localhost:3000";
 
 
 const api = axios.create({
-    baseURL: BASE_URL, // tai prosessin .env:stä
+    baseURL: BASE_URL,
     withCredentials: true,
   });
 
@@ -49,4 +49,18 @@ export const loginCustomer = async (email, password) => {
 export const getMyInfo = async () => {
     // Kutsuu "GET /customers/me" reittiä back-endissä
     return api.get("/customers/me");
+};
+
+// Admin kirjautuminen
+
+export const loginAdmin = async (email, password) => {
+    return api.post("/admin/login", { email, password });
+};
+  
+export const getAdminSession = async () => {
+    return api.get("/admin/me"); // Hakee kirjautuneen adminin tiedot
+};
+  
+export const logoutAdmin = async () => {
+    return api.post("/admin/logout"); // Poistaa adminin istunnon
 };
