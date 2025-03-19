@@ -5,19 +5,19 @@ import { useAdminAuth } from "../context/AdminAuthContext.js";
 
 export default function AdminNavbar() {
     const navigate = useNavigate();
-    const { admin, setAdmin } = useAdminAuth(); // 🔥 Päivitetään admin-tila automaattisesti
+    const { admin, setAdmin } = useAdminAuth(); // Päivitetään admin-tila automaattisesti
   
     useEffect(() => {
       const checkAdminSession = async () => {
         try {
           const response = await getAdminSession();
-          setAdmin(response.data.admin || null); // 🔥 Navbar päivittyy heti
+          setAdmin(response.data.admin || null); // Navbar päivittyy heti
         } catch (error) {
           setAdmin(null);
         }
       };
       checkAdminSession();
-    }, [setAdmin]); // 🔥 Tämä varmistaa päivityksen
+    }, [setAdmin]); // Tämä varmistaa päivityksen
   
     const handleLogout = async () => {
       await logoutAdmin();
