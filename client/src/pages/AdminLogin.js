@@ -1,55 +1,46 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginAdmin, getAdminSession } from "../services/api";
+import { useAdminAuth } from "../context/AdminAuthContext";
 
-export default function AdminLogin({ onLoginSuccess }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const checkIfLoggedIn = async () => {
+export default function AdminLogin() {
+    const { setAdmin } = useAdminAuth(); // Päivitetään adminin tila automaattisesti
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+    const navigate = useNavigate();
+  
+    useEffect(() => {
+      const checkIfLoggedIn = async () => {
+        try {
+          const response = await getAdminSession();
+          if (response.data.admin) {
+            setAdmin(response.data.admin); // admin tallentuu automaattisesti
+            navigate("/admin/dashboard");
+          }
+        } catch (error) {}
+      };
+      checkIfLoggedIn();
+    }, [navigate, setAdmin]);
+  
+    const handleLogin = async (e) => {
+      e.preventDefault();
+      setError("");
+  
       try {
-        const response = await getAdminSession();
-        if (response.data?.admin) {
-          onLoginSuccess(response.data.admin);
+        const response = await loginAdmin(email, password);
+  
+        if (response.data && response.data.success === true) {
+          const sessionResponse = await getAdminSession();
+          setAdmin(sessionResponse.data.admin); // Nyt admin tallentuu automaattisesti
           navigate("/admin/dashboard");
+        } else {
+          setError(response.data?.error || "Kirjautuminen epäonnistui.");
         }
-      } catch (error) {
-        // Ei tehdä mitään, jos admin ei ole kirjautunut
+      } catch (err) {
+        setError(err.response?.data?.error || "Kirjautuminen epäonnistui.");
       }
     };
-    checkIfLoggedIn();
-  }, [navigate, onLoginSuccess]);
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
-
-    try {
-      const response = await loginAdmin(email, password);
-      console.log("🔥 Login response:", response); // 🔥 Debug-logi
-
-      // 🔥 Tarkistetaan, että vastaus on oikeassa muodossa
-      if (response && response.data && response.data.success === true) {
-        console.log("✅ Kirjautuminen onnistui, haetaan istunto...");
-
-        // 🔥 Hakee päivitetyn admin-sessionin
-        const sessionResponse = await getAdminSession();
-        console.log("🔥 Päivitetty sessio:", sessionResponse);
-
-        onLoginSuccess(sessionResponse.data.admin);
-        navigate("/admin/dashboard");
-      } else {
-        console.error("❌ Kirjautumisvirhe: Väärä vastausmuoto", response);
-        setError(response.data?.error || "Kirjautuminen epäonnistui.");
-      }
-    } catch (err) {
-      console.error("❌ Virhe kirjautumisessa:", err);
-      setError(err.response?.data?.error || "Kirjautuminen epäonnistui.");
-    }
-  };
 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">

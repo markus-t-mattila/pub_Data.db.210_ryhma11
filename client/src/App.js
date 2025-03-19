@@ -9,8 +9,10 @@ import Profile from "./pages/Profile";
 import AdminLogin from "./pages/AdminLogin"; // Admin-kirjautumissivu
 import AdminDashboard from "./pages/AdminDashboard";
 import { AuthProvider } from './context/AuthContext';
+import { AdminAuthProvider } from "./context/AdminAuthContext";
 
 export default function App() {
+
   return (
     <Router>
       <Routes>
@@ -31,8 +33,15 @@ export default function App() {
         </Route>
 
 
-        {/* Admin-reitit ilman `AuthProvider`-kontekstia */}
-        <Route path="/admin/*" element={<AdminLayout />}>
+        {/* Admin-reitit käyttävät `AdminAuthProvideria` */}
+        <Route
+          path="/admin/*"
+          element={
+            <AdminAuthProvider>
+              <AdminLayout />
+            </AdminAuthProvider>
+          }
+        >
           <Route path="login" element={<AdminLogin />} />
           <Route path="dashboard" element={<AdminDashboard />} />
         </Route>

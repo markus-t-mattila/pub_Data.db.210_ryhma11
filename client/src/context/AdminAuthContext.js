@@ -1,35 +1,35 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+import { getAdminSession, logoutAdmin } from "../services/api";
 
-export const AdminAuthContext = createContext();
+const AdminAuthContext = createContext();
 
-export function AdminAuthProvider({ children }) {
-  // Alustava oletus: ei kirjautunut
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+export const AdminAuthProvider = ({ children }) => {
+  const [admin, setAdmin] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Tarkistetaan localStoragesta (tai sessionStoragesta),
-    // onko jo talletettu esim. "isLoggedIn=true"
-    const storedLogin = localStorage.getItem("loggedIn");
-    if (storedLogin === "true") {
-      setIsLoggedIn(true);
-    }
+    const checkAdminSession = async () => {
+      try {
+        const response = await getAdminSession();
+        setAdmin(response.data.admin || null);
+      } catch (error) {
+        setAdmin(null);
+      }
+      setLoading(false);
+    };
+    checkAdminSession();
   }, []);
 
-  // Kirjaudu sisään (esim. kutsutaan, kun login pyyntö onnistuu)
-  const login = () => {
-    setIsLoggedIn(true);
-    localStorage.setItem("loggedIn", "true");
-  };
-
-  // Kirjaudu ulos
-  const logout = () => {
-    setIsLoggedIn(false);
-    localStorage.removeItem("loggedIn");
+  const logout = async () => {
+    await logoutAdmin();
+    setAdmin(null);
   };
 
   return (
-    <AdminAuthContext.Provider value={{ isLoggedIn, login, logout }}>
+    <AdminAuthContext.Provider value={{ admin, setAdmin, logout, loading }}>
       {children}
     </AdminAuthContext.Provider>
   );
-}
+};
+
+export const useAdminAuth = () => useContext(AdminAuthContext);
