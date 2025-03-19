@@ -15,13 +15,20 @@ psql -h ${PG_HOST} -U ${PG_USER} -W -c "GRANT ALL PRIVILEGES ON DATABASE ${PG_DB
 `;
 
 // Komennot tietokannan alustamiseen
-const RESET_DB_COMMAND = `psql -h ${PG_HOST} -U ${PG_USER} -f src/database/reset_db.sql`;
-const INIT_DB_COMMAND = `psql -h ${PG_HOST} -U ${PG_USER} -f src/database/init_db.sql`;
+const RESET_DB_COMMAND = `psql -h ${PG_HOST} -U ${PG_USER} -f src/database/sql_statements/reset_db.sql`;
+const INIT_DB_COMMAND = `psql -h ${PG_HOST} -U ${PG_USER} -f src/database/sql_statements/init_db.sql`;
 
 console.log("Resetoidaan tietokanta...");
 
 // Ajetaan ensin resetointi
 exec(RESET_DB_COMMAND, (error, stdout, stderr) => {
+  if (stdout) {
+    console.log('STDOUT:\n'+stdout);
+  }
+  if (stderr) {
+    console.log('STDERR:\n'+stderr);
+  }
+
   if (error) {
     console.error("Virhe tietokannan resetoinnissa:", stderr);
     return;
@@ -31,6 +38,13 @@ exec(RESET_DB_COMMAND, (error, stdout, stderr) => {
   // Ajetaan sen jälkeen alustus
   console.log("alustetaan tietokanta...");
   exec(INIT_DB_COMMAND, (error, stdout, stderr) => {
+    if (stdout) {
+      console.log('STDOUT:\n'+stdout);
+    }
+    if (stderr) {
+      console.log('STDERR:\n'+stderr);
+    }
+  
     if (error) {
       console.error("Virhe tietokannan alustuksessa:", stderr);
       return;
@@ -38,3 +52,4 @@ exec(RESET_DB_COMMAND, (error, stdout, stderr) => {
     console.log("Tietokannan alustus onnistui!");
   });
 });
+
