@@ -78,3 +78,47 @@ export const registerAdmin = async (req, res) => {
     return res.status(500).json({ error: 'Internal server error.' });
   }
 };
+
+
+// Adminin kirjautuminen
+export const loginAdmin = async (req, res) => {
+    try {
+      const { email, password } = req.body;
+  
+      // Tarkistetaan, että syötteet eivät ole tyhjiä
+      if (!email || !password) {
+        return res.status(400).json({ error: "Sähköposti ja salasana vaaditaan." });
+      }
+  
+      // Haetaan admin tietokannasta sähköpostin perusteella
+      const adminQuery = "SELECT * FROM admin WHERE email = $1";
+      const adminResult = await pool.query(adminQuery, [email]);
+  
+      // Tarkistetaan, löytyikö admin
+      if (adminResult.rows.length === 0) {
+        return res.status(401).json({ error: "Väärä sähköposti tai salasana." });
+      }
+  
+      const admin = adminResult.rows[0];
+  
+      // Vertaillaan annettua salasanaa tietokannassa olevaan hashattuun salasanaan
+      const isPasswordValid = await bcrypt.compare(password, admin.passwrd);
+      if (!isPasswordValid) {
+        return res.status(401).json({ error: "Väärä sähköposti tai salasana." });
+      }
+  
+      // Kirjautuminen onnistui
+      res.status(200).json({
+        message: "Kirjautuminen onnistui",
+        admin: {
+          id: admin.id,
+          email: admin.email,
+          is_central: admin.is_central,
+        },
+      });
+  
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Palvelinvirhe. Yritä uudelleen myöhemmin." });
+    }
+  };
