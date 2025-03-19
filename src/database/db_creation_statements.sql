@@ -177,6 +177,35 @@ CREATE TABLE IF NOT EXISTS shipment_item (
     ON DELETE RESTRICT
 );
 
+-- new table for admins
+CREATE TABLE IF NOT EXISTS admin (
+  id          UUID          PRIMARY KEY DEFAULT uuid_generate_v4(),
+  email       VARCHAR(100)  NOT NULL,
+  passwrd     TEXT          NOT NULL,
+  is_central  BOOLEAN       NOT NULL DEFAULT FALSE -- central admin has rights to all stores
+);
+
+-- bridge table for admins and stores
+CREATE TABLE IF NOT EXISTS admin_store (
+  admin_id   UUID  NOT NULL,
+  store_id   UUID  NOT NULL,
+
+  PRIMARY KEY (admin_id, store_id),
+
+  CONSTRAINT fk_admin_store_admin
+    FOREIGN KEY (admin_id)
+    REFERENCES admin (id)
+    ON DELETE CASCADE,
+
+  CONSTRAINT fk_admin_store_store
+    FOREIGN KEY (store_id)
+    REFERENCES store (id)
+    ON DELETE CASCADE,
+
+  -- Admin can only be assigned to a store once
+  CONSTRAINT unq_admin_store UNIQUE (admin_id, store_id)
+);
+
 /* -- single_db
 
 CREATE TABLE IF NOT EXISTS title (
