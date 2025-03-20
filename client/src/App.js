@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import SearchResults from "./pages/SearchResults";
 import Profile from "./pages/Profile";  
+import Classes from "./pages/Classes";
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
           <Route path="search" element={<SearchResults />} />
+          <Route path="classes" element={<Classes />} />
           {<Route path="profile" element={<Profile />} />} 
         </Route>
       </Routes>

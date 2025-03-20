@@ -28,6 +28,17 @@ export const searchBooks = async (query) => {
     }
 };
 
+export const getClasses = async () => {
+    try {
+        const response = await api.get("/books/classes");
+        return response.data;
+    } catch (error) {
+        console.error("Virhe haettaessa teosluokkia:", error);
+        return [];
+    }
+};
+
+
 // Customer rekisterointi
 export const registerCustomer = async (userData) => {
     // userData on { name, email, password, phone, street_address, postcode, city }
