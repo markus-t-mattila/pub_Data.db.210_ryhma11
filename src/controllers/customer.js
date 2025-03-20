@@ -5,6 +5,7 @@ import pool from '../config/db.js';
 import bcrypt from 'bcrypt';
 
 import { requireLogin } from '../middleware/auth.js';
+import { createFileWithContent, jsonToCsv } from '../utils/helpers.js';
 
 // GET /api/customers?id=xxx tai email=xxx
 export const getCustomer = async (req, res) => {
@@ -41,6 +42,34 @@ export const getCustomer = async (req, res) => {
         return res.status(500).json({ error: 'Internal Error' });
     }
 };
+
+export const createCustomersStatsFile = async (req, res) => {
+  const query = `
+    SELECT 
+      c.name,
+      c.email,
+      COUNT(b.id) AS bought_books_count
+    FROM customer c
+    LEFT JOIN purchase p ON c.id = p.customer_id 
+        AND p.date >= NOW() - INTERVAL '1 year'
+    LEFT JOIN book b ON p.id = b.purchase_id
+    GROUP BY c.id, c.name, c.email;
+  `
+
+  try { 
+    const result = await pool.query(query);
+    const { rows } = result;
+
+    const shownHeader = ['Nimi', 'Sähköposti', 'Ostettujen kirjojen lkm'];
+    const csvContent = jsonToCsv(rows, shownHeader);
+    const path = await createFileWithContent(csvContent, 'csv');
+  
+    res.json({path: path});
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal error' });
+  }
+}
 
 export const registerCustomer = async (req, res) => {
   try {

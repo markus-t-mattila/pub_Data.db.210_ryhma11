@@ -6,6 +6,7 @@ import Register from "./pages/Register";
 import SearchResults from "./pages/SearchResults";
 import Profile from "./pages/Profile";  
 import Classes from "./pages/Classes";
+import CustomersStats from "./pages/CustomersStats";
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
           <Route path="register" element={<Register />} />
           <Route path="search" element={<SearchResults />} />
           <Route path="classes" element={<Classes />} />
+          <Route path="customers-stats" element={<CustomersStats />} />
           {<Route path="profile" element={<Profile />} />} 
         </Route>
       </Routes>

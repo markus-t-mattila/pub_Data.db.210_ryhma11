@@ -33,7 +33,7 @@ export const searchBooks = async (req, res) => {
     res.json(rows);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal error' });
   }
 };
 
@@ -56,6 +56,6 @@ export const titlesByClass = async (req, res) => {
     res.json(rows);
   } catch (err) {
     console.error(err);
-    res.status(500).json({error: err.message});
+    res.status(500).json({ error: 'Internal error' });
   }
 }

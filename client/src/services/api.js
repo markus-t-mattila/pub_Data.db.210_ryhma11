@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:3000";
+export const BASE_URL = "http://localhost:3000";
 
 
 const api = axios.create({
@@ -38,6 +38,15 @@ export const getClasses = async () => {
     }
 };
 
+export const getCustomersStats = async () => {
+    try {
+        const response = await api.get("/customers/stats");
+        return response.data;
+    } catch (error) {
+        console.error("Virhe haettaessa asiakasdataa:", error);
+        return null;
+    }
+};
 
 // Customer rekisterointi
 export const registerCustomer = async (userData) => {

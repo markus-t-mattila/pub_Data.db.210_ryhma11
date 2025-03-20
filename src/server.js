@@ -5,6 +5,7 @@ import cors from 'cors'; // Lisätty CORS
 import pool from "./config/db.js"; // Tietokantayhteys
 import bookRoutes from './routes/bookRoutes.js';
 import customer from './routes/customer.js'; // Lisätty asiakasreitit
+import file from './routes/file.js';
 
 
 // Lataa ympäristömuuttujat (varmista, että polku on oikein)
@@ -47,6 +48,9 @@ app.use('/books', bookRoutes);
 
 // Käytä asiakasreittejä
 app.use('/customers', customer);
+
+// Käytä tiedostoreittejä
+app.use('/uploads', file);
 
 // Testireitti, jolla frontend voi varmistaa, että backend toimii
 app.get("/", (req, res) => {
