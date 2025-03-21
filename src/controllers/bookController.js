@@ -36,3 +36,82 @@ export const searchBooks = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+export const queryBooks = async (req, res) => {
+  const {
+    name,
+    writer,
+    type_id,
+    class_id,
+    min_price,
+    max_price,
+    min_year,
+    max_year
+  } = req.query;
+
+  let conditions = [];
+  let values = [];
+  let i = 1;
+
+  if (name) {
+    conditions.push(`LOWER(t.name) LIKE LOWER($${i++})`);
+    values.push(`%${name}%`);
+  }
+  if (writer) {
+    conditions.push(`LOWER(t.writer) LIKE LOWER($${i++})`);
+    values.push(`%${writer}%`);
+  }
+  if (type_id) {
+    conditions.push(`t.type_id = $${i++}`);
+    values.push(type_id);
+  }
+  if (class_id) {
+    conditions.push(`t.class_id = $${i++}`);
+    values.push(class_id);
+  }
+  if (min_price) {
+    conditions.push(`b.sale_price >= $${i++}`);
+    values.push(min_price);
+  }
+  if (max_price) {
+    conditions.push(`b.sale_price <= $${i++}`);
+    values.push(max_price);
+  }
+  if (min_year) {
+    conditions.push(`t.year >= $${i++}`);
+    values.push(min_year);
+  }
+  if (max_year) {
+    conditions.push(`t.year <= $${i++}`);
+    values.push(max_year);
+  }
+
+  const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+
+  const query = `
+    SELECT
+      b.id AS book_id,
+      t.id AS title_id,
+      t.name,
+      t.writer,
+      t.year,
+      t.weight,
+      bt.name AS type,
+      bc.name AS class,
+      b.sale_price
+    FROM book b
+    JOIN title t ON b.title_id = t.id
+    JOIN book_type bt ON t.type_id = bt.id
+    JOIN book_class bc ON t.class_id = bc.id
+    ${whereClause}
+    ORDER BY t.name ASC
+  `;
+
+  try {
+    const { rows } = await pool.query(query, values);
+    res.json(rows);
+  } catch (err) {
+    console.error('Search error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
