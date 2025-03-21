@@ -87,7 +87,7 @@ export default function Books() {
       {loading ? (
         <p className="text-lg text-blue-600 font-semibold">🔄 Ladataan tietoja...</p>
       ) : (
-        <p>Kirjoja yhteensä: {groupedBooks.length}</p>
+        <p>Kirjoja yhteensä: {books.length}</p>
       )}
 
       {!loading && (
