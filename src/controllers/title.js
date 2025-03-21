@@ -15,7 +15,7 @@ export const addTitle = async (req, res) => {
   } = req.body;
 
   // Tarkistetaan että kaikki pakolliset kentät on annettu
-  if (!name || !writer || !publisher || !year || !weight || !type_name || !class_name) {
+  if (!name || !writer || !publisher || !weight || !type_name || !class_name) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 

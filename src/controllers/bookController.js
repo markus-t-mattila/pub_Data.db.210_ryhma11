@@ -1,4 +1,5 @@
 import pool from '../config/db.js';
+import { v4 as uuidv4 } from 'uuid';
 
 export const searchBooks = async (req, res) => {
   const searchTerm = req.query.q;
@@ -98,5 +99,146 @@ export const queryBooks = async (req, res) => {
     // Virheen sattuessa lokitetaan ja palautetaan virheilmoitus
     console.error('Search error:', err);
     res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+
+
+// Funktio uuden kirjan ja tarvittaessa titlen lisäämiseen
+export const addBookWithTitleService = async (req, res) => {
+  const {
+    isbn,
+    name,
+    writer,
+    publisher,
+    year,
+    weight,
+    type_name,
+    class_name,
+    store_name,
+    condition,
+    purchase_price,
+    sale_price
+  } = req.body;
+
+  // Tarkistetaan että kaikki pakolliset kentät on annettu
+  if (!name || !writer || !publisher || !weight || !type_name || !class_name || !store_name || !condition || !purchase_price || !sale_price) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    // Normalisoidaan syötetyt luokka- ja tyyppinimet ISOILLA kirjaimilla
+    const typeNameNormalized = type_name.toUpperCase();
+    const classNameNormalized = class_name.toUpperCase();
+
+    // Haetaan sallitut tyypit ja luokat
+    const typeResult = await client.query('SELECT name FROM book_type');
+    const classResult = await client.query('SELECT name FROM book_class');
+    const allowedTypes = typeResult.rows.map(row => row.name);
+    const allowedClasses = classResult.rows.map(row => row.name);
+
+    // Tarkistetaan että tyypit ovat validit
+    if (!allowedTypes.includes(typeNameNormalized)) {
+      return res.status(400).json({
+        error: 'Invalid type_name',
+        allowed_types: allowedTypes
+      });
+    }
+    if (!allowedClasses.includes(classNameNormalized)) {
+      return res.status(400).json({
+        error: 'Invalid class_name',
+        allowed_classes: allowedClasses
+      });
+    }
+
+    // Tarkistetaan löytyykö jo kyseinen title
+    const existing = await client.query(
+      `SELECT id FROM title 
+       WHERE LOWER(name) = LOWER($1) AND LOWER(writer) = LOWER($2) AND year = $3 AND LOWER(publisher) = LOWER($4)`,
+      [name, writer, year, publisher]
+    );
+
+    let titleId;
+
+    if (existing.rows.length > 0) {
+      // Jos title löytyy, otetaan id talteen
+      titleId = existing.rows[0].id;
+    } else {
+      // Muuten lisätään uusi title
+      titleId = uuidv4();
+      await client.query(
+        `INSERT INTO title (
+          id, isbn, name, writer, publisher, year, weight, type, class, created_at, modified_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())`,
+        [
+          titleId,
+          isbn,
+          name,
+          writer,
+          publisher,
+          year,
+          weight,
+          typeNameNormalized,
+          classNameNormalized
+        ]
+      );
+    }
+
+    // Haetaan kaikki store-nimet ja id:t
+    const storeRes = await client.query('SELECT id, name FROM store');
+
+    // Etsitään store_name pienellä kirjainkoolla
+    const matchingStore = storeRes.rows.find(
+      store => store.name.toLowerCase() === store_name.toLowerCase()
+    );
+
+    if (!matchingStore) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({
+        error: `Store '${store_name}' not found`,
+        allowed_stores: storeRes.rows.map(row => row.name)
+      });
+    }
+
+    const storeId = matchingStore.id;
+
+    // Lisätään book instanssi
+    const bookId = uuidv4();
+    await client.query(
+      `INSERT INTO book (
+        id, title_id, condition, purchase_price, sale_price, status, store_id, created_at, modified_at
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, NOW(), NOW()
+      )`,
+      [
+        bookId,
+        titleId,
+        condition,
+        purchase_price,
+        sale_price,
+        'AVAILABLE',
+        storeId
+      ]
+    );
+
+    await client.query('COMMIT');
+
+    res.status(201).json({
+      message: 'Book added successfully',
+      book_id: bookId,
+      title_id: titleId
+    });
+
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Error adding book/title:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
   }
 };
