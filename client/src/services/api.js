@@ -64,3 +64,12 @@ export const getAdminSession = async () => {
 export const logoutAdmin = async () => {
     return api.post("/admin/logout"); // Poistaa adminin istunnon
 };
+
+export const availableBooks = async () => {
+    return api.get("/books/available");
+};
+
+export const addToCart = async (bookId) => {
+    console.log("Lisätään ostoskoriin kirja", bookId);
+    return api.post("/cart", { bookId });
+};

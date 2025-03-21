@@ -4,6 +4,7 @@ import AdminLayout from "./components/AdminLayout"; // Adminin sivujen layout
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Books from "./pages/Books";
 import SearchResults from "./pages/SearchResults";
 import Profile from "./pages/Profile";
 import AdminLogin from "./pages/AdminLogin"; // Admin-kirjautumissivu
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="register" element={<Register />} />
           <Route path="search" element={<SearchResults />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="books" element={<Books />} />
         </Route>
 
 

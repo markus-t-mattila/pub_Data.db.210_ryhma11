@@ -27,7 +27,7 @@ export default function Navbar() {
 
         {/* Logo / Nimi */}
         <div className="text-xl font-bold">
-          <Link to="/">📚 Keskusdivari</Link>
+          <Link to="/books">📚 Keskusdivari</Link>
         </div>
 
         {/* Keskiosan navigointilinkit */}

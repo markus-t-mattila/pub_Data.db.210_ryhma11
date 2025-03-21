@@ -1,9 +1,11 @@
 import express from 'express';
-import { searchBooks, queryBooks, addBookWithTitleService } from '../controllers/bookController.js';
+import { searchBooks, queryBooks, addBookWithTitleService, availableBooks } from '../controllers/bookController.js';
 
 const router = express.Router();
 
 router.get('/search', searchBooks);
+
+router.get('/available', availableBooks);
 
 router.get('/', queryBooks);
 

@@ -36,6 +36,34 @@ export const searchBooks = async (req, res) => {
   }
 };
 
+export const availableBooks = async (req, res) => {
+
+  const query = `
+    SELECT
+      b.id AS book_id,
+      t.id AS title_id,
+      b.status,
+      t.name,
+      t.writer,
+      t.year,
+      t.weight,
+      t.type,
+      t.class,
+      b.sale_price,
+      t.isbn
+    FROM book b
+    JOIN title t ON b.title_id = t.id
+    WHERE b.status = 'AVAILABLE'
+    ORDER BY t.name ASC`;
+  try {
+    const { rows } = await pool.query(query);
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
 export const queryBooks = async (req, res) => {
   // Määritellään sallitut hakukentät ja niihin liittyvät vertailuoperaattorit
   // Avain on hakutermin nimi, arvo on SQL-ehto (taulun sarake + vertailu)
@@ -83,8 +111,10 @@ export const queryBooks = async (req, res) => {
       t.writer,
       t.year,
       t.weight,
+      t.type,
       t.class,
-      b.sale_price
+      b.sale_price,
+      t.isbn
     FROM book b
     JOIN title t ON b.title_id = t.id
     ${whereClause}
