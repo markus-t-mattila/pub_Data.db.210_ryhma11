@@ -6,6 +6,7 @@ import pool from "./config/db.js"; // Tietokantayhteys
 import bookRoutes from './routes/bookRoutes.js';
 import customer from './routes/customer.js'; // Lisätty asiakasreitit
 import adminRoutes from './routes/admin.js'; // Lisätty adminreitit
+import storeRoutes from './routes/stores.js'; // Lisätty myymäläreitit
 
 
 // Lataa ympäristömuuttujat (varmista, että polku on oikein)
@@ -51,6 +52,9 @@ app.use('/customers', customer);
 
 // admin reitit
 app.use('/admin', adminRoutes);
+
+// Stores-reitit
+app.use('/stores', storeRoutes);
 
 // Testireitti, jolla frontend voi varmistaa, että backend toimii
 app.get("/", (req, res) => {
