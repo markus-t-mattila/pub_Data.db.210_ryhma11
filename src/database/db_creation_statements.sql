@@ -202,10 +202,7 @@ CREATE TABLE IF NOT EXISTS admin_store (
   CONSTRAINT fk_admin_store_store
     FOREIGN KEY (store_id)
     REFERENCES store (id)
-    ON DELETE CASCADE,
-
-  -- Admin can only be assigned to a store once
-  CONSTRAINT unq_admin_store UNIQUE (admin_id, store_id)
+    ON DELETE CASCADE
 );
 
 /* -- single_db

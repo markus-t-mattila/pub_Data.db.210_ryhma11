@@ -17,8 +17,8 @@ export default function Navbar() {
   };
 
   const handleLogout = () => {
-    logout(); // Kirjaa ulos, asettaa isLoggedIn=false tms.
-    navigate("/"); // palaa vaikka etusivulle
+    logout(); // Kirjaa ulos
+    navigate("/"); // palaa etusivulle
   };
 
   return (
