@@ -36,65 +36,52 @@ export const searchBooks = async (req, res) => {
 };
 
 export const queryBooks = async (req, res) => {
-  const {
-    name,
-    writer,
-    type_id,
-    class_id,
-    min_price,
-    max_price,
-    min_year,
-    max_year
-  } = req.query;
+  // Määritellään sallitut hakukentät ja niihin liittyvät vertailuoperaattorit
+  // Avain on hakutermin nimi, arvo on SQL-ehto (taulun sarake + vertailu)
+  const allowedFilters = {
+    name: { column: 'LOWER(t.name)', operator: 'LIKE', wrapLike: true },
+    writer: { column: 'LOWER(t.writer)', operator: 'LIKE', wrapLike: true },
+    //type: { column: 't.type', operator: '=', wrapLike: false },
+    //class: { column: 't.class', operator: '=', wrapLike: false },
+    min_price: { column: 'b.sale_price', operator: '>=', wrapLike: false },
+    max_price: { column: 'b.sale_price', operator: '<=', wrapLike: false },
+    min_year: { column: 't.year', operator: '>=', wrapLike: false },
+    max_year: { column: 't.year', operator: '<=', wrapLike: false },
+    status: { column: 'b.status', operator: '=', wrapLike: false },
+    title_id: { column: 't.id', operator: '=', wrapLike: false },
+    book_id: { column: 'b.id', operator: '=', wrapLike: false }
+  };
 
-  let conditions = [];
-  let values = [];
-  let i = 1;
+  const conditions = []; // SQL-ehdot
+  const values = [];     // SQL-parametrit
+  let i = 1;              // Parametrien numerointi ($1, $2, ...)
 
-  if (name) {
-    conditions.push(`LOWER(t.name) LIKE LOWER($${i++})`);
-    values.push(`%${name}%`);
-  }
-  if (writer) {
-    conditions.push(`LOWER(t.writer) LIKE LOWER($${i++})`);
-    values.push(`%${writer}%`);
-  }
-  if (type_id) {
-    conditions.push(`t.type_id = $${i++}`);
-    values.push(type_id);
-  }
-  if (class_id) {
-    conditions.push(`t.class_id = $${i++}`);
-    values.push(class_id);
-  }
-  if (min_price) {
-    conditions.push(`b.sale_price >= $${i++}`);
-    values.push(min_price);
-  }
-  if (max_price) {
-    conditions.push(`b.sale_price <= $${i++}`);
-    values.push(max_price);
-  }
-  if (min_year) {
-    conditions.push(`t.year >= $${i++}`);
-    values.push(min_year);
-  }
-  if (max_year) {
-    conditions.push(`t.year <= $${i++}`);
-    values.push(max_year);
+  // Käydään läpi kaikki sallitut hakutermit
+  for (const [param, config] of Object.entries(allowedFilters)) {
+    const value = req.query[param];
+    if (value !== undefined) {
+      // Jos kyseessä LIKE-haku, lisätään % ympärille
+      const paramValue = config.wrapLike ? `%${value}%` : value;
+
+      // Lisätään SQL-ehto oikealla operaattorilla
+      conditions.push(`${config.column} ${config.operator} $${i++}`);
+      values.push(paramValue);
+    }
   }
 
+  // Rakennetaan WHERE-lause vain jos ehtoja on
   const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
 
+  // Rakennetaan koko SQL-kysely
   const query = `
     SELECT
       b.id AS book_id,
       t.id AS title_id,
+      b.status,
       t.name,
       t.writer,
       t.year,
       t.weight,
-      t.type,
       t.class,
       b.sale_price
     FROM book b
@@ -104,9 +91,11 @@ export const queryBooks = async (req, res) => {
   `;
 
   try {
+    // Suoritetaan kysely ja palautetaan tulokset
     const { rows } = await pool.query(query, values);
     res.json(rows);
   } catch (err) {
+    // Virheen sattuessa lokitetaan ja palautetaan virheilmoitus
     console.error('Search error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }

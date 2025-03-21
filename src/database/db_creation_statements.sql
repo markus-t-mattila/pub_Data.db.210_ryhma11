@@ -99,14 +99,14 @@ CREATE TABLE IF NOT EXISTS title (
   created_at    TIMESTAMP       NOT NULL,
   modified_at   TIMESTAMP       NOT NULL,
 
-  CONSTRAINT fk_type_id
-    FOREIGN KEY (type_id)
-    REFERENCES book_type (id)
+  CONSTRAINT fk_type
+    FOREIGN KEY (type)
+    REFERENCES book_type (name)
     ON DELETE RESTRICT,
 
-  CONSTRAINT fk_class_id
-    FOREIGN KEY (class_id)
-    REFERENCES book_class (id)
+  CONSTRAINT fk_class
+    FOREIGN KEY (class)
+    REFERENCES book_class (name)
     ON DELETE RESTRICT
 );
 
