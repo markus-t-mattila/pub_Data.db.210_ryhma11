@@ -18,7 +18,7 @@ CREATE TYPE status_enum AS ENUM (
 
 -- book type
 CREATE TABLE IF NOT EXISTS book_type (
-  id    UUID    PRIMARY KEY DEFAULT uuid_generate_v4(),
+  -- id    UUID    PRIMARY KEY DEFAULT uuid_generate_v4(),
   name  TEXT    UNIQUE NOT NULL
 );
 
@@ -30,7 +30,7 @@ INSERT INTO book_type (name) VALUES
 
 -- book genre / class
 CREATE TABLE IF NOT EXISTS book_class (
-  id    UUID    PRIMARY KEY DEFAULT uuid_generate_v4(),
+  --id    UUID    PRIMARY KEY DEFAULT uuid_generate_v4(),
   name  TEXT    UNIQUE NOT NULL
 );
 
@@ -92,8 +92,10 @@ CREATE TABLE IF NOT EXISTS title (
   publisher     TEXT            NOT NULL,
   year          NUMERIC(4),
   weight        NUMERIC(6)      NOT NULL,
-  type_id       UUID            NOT NULL,
-  class_id      UUID            NOT NULL,
+  --type_id       UUID            NOT NULL,
+  --class_id      UUID            NOT NULL,
+  type       TEXT            NOT NULL, --otetaan suoraan arvo -> id tässä mielestäni turha
+  class      TEXT            NOT NULL, --otetaan suoraan arvo -> id tässä mielestäni turha
   created_at    TIMESTAMP       NOT NULL,
   modified_at   TIMESTAMP       NOT NULL,
 
