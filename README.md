@@ -10,6 +10,8 @@
 * dummy_data tiedosto muokkattu yllä olevan mukaiseksi
 * lisätty kysely endpointeja (parametreilla)
 
+#### uusi sivu frontissa http://localhost:5173/books -> tällä saadaan lähetettyä ostokoriin menevien kirjojen ID:t bäkkärille
+
 #### Titlen eli teoksen lisäys onnistuu POST http://localhost:3000/title
 
 ```
