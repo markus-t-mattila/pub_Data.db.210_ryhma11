@@ -1,11 +1,23 @@
 import { useState, useEffect } from "react";
-import { availableBooks, addToCart } from "../services/api"; // 🔹 Tuodaan ostoskori-toiminto
+import { availableBooks, addToCart } from "../services/api"; 
 
 export default function Books() {
   const [books, setBooks] = useState([]);
   const [groupedBooks, setGroupedBooks] = useState([]);
+  const [filteredBooks, setFilteredBooks] = useState([]);
   const [expandedRows, setExpandedRows] = useState({});
   const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState({
+    name: "",
+    writer: "",
+    year: "",
+    type: "",
+    class: "",
+    min_price: "",
+    max_price: "",
+    isbn: "",
+    weight: ""
+  });
 
   useEffect(() => {
     fetchBooks();
@@ -14,20 +26,21 @@ export default function Books() {
   const fetchBooks = async () => {
     setLoading(true);
     console.log("Fetching all books...");
-    
+
     const booksData = await availableBooks();
     console.log("Books received from API:", booksData);
 
-    if (Array.isArray(booksData)) {
-      setBooks(booksData);
-      setGroupedBooks(groupBooksByTitle(booksData));
-    } else if (booksData.data && Array.isArray(booksData.data)) {
-      setBooks(booksData.data);
-      setGroupedBooks(groupBooksByTitle(booksData.data));
+    const data = booksData.data && Array.isArray(booksData.data) ? booksData.data : booksData;
+
+    if (Array.isArray(data)) {
+      setBooks(data);
+      const grouped = groupBooksByTitle(data);
+      setGroupedBooks(grouped);
+      setFilteredBooks(grouped);
     } else {
       console.error("Unexpected API response format:", booksData);
     }
-    
+
     setLoading(false);
   };
 
@@ -48,7 +61,7 @@ export default function Books() {
           count: 1,
           min_price: parseFloat(book.sale_price),
           max_price: parseFloat(book.sale_price),
-          books: [book],
+          books: [book]
         };
       } else {
         grouped[book.title_id].count += 1;
@@ -61,7 +74,22 @@ export default function Books() {
     return Object.values(grouped);
   };
 
-  // Avataan tai suljetaan yksittäiset kirjat
+  useEffect(() => {
+    const filtered = groupedBooks.filter((book) =>
+      Object.entries(filters).every(([key, value]) => {
+        if (!value) return true;
+        if (key === "min_price") return book.min_price >= parseFloat(value);
+        if (key === "max_price") return book.max_price <= parseFloat(value);
+        return book[key]?.toString().toLowerCase().includes(value.toLowerCase());
+      })
+    );
+    setFilteredBooks(filtered);
+  }, [filters, groupedBooks]);
+
+  const handleFilterChange = (e) => {
+    setFilters({ ...filters, [e.target.name]: e.target.value });
+  };
+
   const toggleRow = (title_id) => {
     setExpandedRows((prev) => ({
       ...prev,
@@ -69,7 +97,6 @@ export default function Books() {
     }));
   };
 
-  // Lähetetään `book_id` backendille ostoskoriin
   const handleAddToCart = async (book_id) => {
     try {
       await addToCart(book_id);
@@ -102,78 +129,94 @@ export default function Books() {
               <th className="border p-2">Luokka</th>
               <th className="border p-2">Min Hinta (€)</th>
               <th className="border p-2">Max Hinta (€)</th>
-              <th className="border p-2">Kpl Määrä</th>
               <th className="border p-2">ISBN</th>
               <th className="border p-2">Paino (g)</th>
+              <th className="border p-2">Kpl Määrä</th>
+            </tr>
+
+            {/* Hakukentät */}
+            <tr className="bg-gray-100">
+              <td className="border p-1"></td>
+              {Object.entries(filters).map(([key, value]) => (
+                <td key={key} className="border p-1">
+                  <input
+                    type="text"
+                    name={key}
+                    placeholder="Haku..."
+                    value={value}
+                    onChange={handleFilterChange}
+                    className="w-full p-1 border border-gray-300 rounded text-sm"
+                  />
+                </td>
+              ))}
+              <td className="border p-1"></td>
             </tr>
           </thead>
           <tbody>
-            {groupedBooks.length > 0 ? (
-              groupedBooks.map((group) => (
-                <>
-                  {/* Ryhmitelty pääkirja */}
-                  <tr key={group.title_id} className="border">
-                    <td className="border p-2 text-center">
-                      {group.count > 1 ? (
-                        <button
-                          onClick={() => toggleRow(group.title_id)}
-                          className="text-lg font-bold"
-                        >
-                          {expandedRows[group.title_id] ? "➖" : "➕"}
-                        </button>
-                      ) : (
-                        <button
+              {filteredBooks.length > 0 ? (
+                filteredBooks.map((group) => (
+                  <>
+                    {/* Pääryhmä (title_id:n mukaan ryhmitelty) */}
+                    <tr key={group.title_id} className="border">
+                      <td className="border p-2 text-center">
+                        {group.count > 1 ? (
+                          <button
+                            onClick={() => toggleRow(group.title_id)}
+                            className="text-lg font-bold"
+                          >
+                            {expandedRows[group.title_id] ? "➖" : "➕"}
+                          </button>
+                        ) : (
+                          <button
                             onClick={() => handleAddToCart(group.books[0].book_id)}
                             className="bg-white text-white px-3 py-1 rounded hover:bg-gray-200"
                           >🛒
                           </button>
-                      )}
-                    </td>
-                    <td className="border p-2">{group.name}</td>
-                    <td className="border p-2">{group.writer}</td>
-                    <td className="border p-2">{group.year}</td>
-                    <td className="border p-2">{group.type}</td>
-                    <td className="border p-2">{group.class}</td>
-                    <td className="border p-2">{group.min_price.toFixed(2)}€</td>
-                    <td className="border p-2">{group.max_price.toFixed(2)}€</td>
-                    <td className="border p-2 text-center">{group.count}</td>
-                    <td className="border p-2">{group.isbn}</td>
-                    <td className="border p-2">{group.weight} g</td>
-                  </tr>
-
-                  {/* Yksittäiset kirjat, jos rivi on laajennettu */}
-                  {expandedRows[group.title_id] &&
-                    group.books.map((book) => (
-                      <tr key={book.book_id} className="border bg-gray-100">
-                        <td className="border p-2 text-center">
-                          <button
-                            onClick={() => handleAddToCart(book.book_id)}
-                            className="bg-white text-white px-3 py-1 rounded hover:bg-gray-200"
-                          >🛒
-                          </button>
-                        </td>
-                        <td className="border p-2 pl-8">{book.name}</td>
-                        <td className="border p-2">{book.writer}</td>
-                        <td className="border p-2">{book.year}</td>
-                        <td className="border p-2">{book.type}</td>
-                        <td className="border p-2">{book.class}</td>
-                        <td className="border p-2">{parseFloat(book.sale_price).toFixed(2)}€</td>
-                        <td className="border p-2"></td>
-                        <td className="border p-2"></td>
-                        <td className="border p-2">{book.isbn}</td>
-                        <td className="border p-2">{book.weight} g</td>
-                      </tr>
-                    ))}
-                </>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="11" className="text-center p-4">
-                  Ei kirjoja saatavilla.
-                </td>
-              </tr>
-            )}
-          </tbody>
+                        )}
+                      </td>
+                      <td className="border p-2">{group.name}</td>
+                      <td className="border p-2">{group.writer}</td>
+                      <td className="border p-2">{group.year}</td>
+                      <td className="border p-2">{group.type}</td>
+                      <td className="border p-2">{group.class}</td>
+                      <td className="border p-2">{group.min_price.toFixed(2)}€</td>
+                      <td className="border p-2">{group.max_price.toFixed(2)}€</td>
+                      <td className="border p-2">{group.isbn}</td>
+                      <td className="border p-2">{group.weight} g</td>
+                      <td className="border p-2 text-center">{group.count}</td>
+                    </tr>
+                    
+                    {/* Yksittäiset kirjat laajennettuna */}
+                    {expandedRows[group.title_id] &&
+                      group.books.map((book) => (
+                        <tr key={book.book_id} className="border bg-gray-100">
+                          <td className="border p-2 text-center">
+                            <button
+                              onClick={() => handleAddToCart(book.book_id)}
+                              className="bg-white text-white px-3 py-1 rounded hover:bg-gray-200"
+                            >🛒
+                            </button>
+                          </td>
+                          <td className="border p-2 pl-8">{book.name}</td>
+                          <td className="border p-2">{book.writer}</td>
+                          <td className="border p-2">{book.year}</td>
+                          <td className="border p-2">{book.type}</td>
+                          <td className="border p-2">{book.class}</td>
+                          <td className="border p-2">{parseFloat(book.sale_price).toFixed(2)}€</td>
+                          <td className="border p-2"></td>
+                          <td className="border p-2"></td>
+                          <td className="border p-2">{book.isbn}</td>
+                          <td className="border p-2">{book.weight} g</td>
+                        </tr>
+                      ))}
+                  </>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="11" className="text-center p-4">Ei kirjoja saatavilla.</td>
+                </tr>
+              )}
+            </tbody>
         </table>
       )}
     </div>
