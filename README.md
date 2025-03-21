@@ -4,6 +4,13 @@
 
 ========================================================================
 
+### MMa 2025-03-21
+
+* Tietokanta rakennetta muutettu -> tyypin ja luokan takaa kommentoitu ID:t pois ja käytetään suoraan teksti arvoja
+* dummy_data tiedosto muokkattu yllä olevan mukaiseksi
+* lisätty kysely endpointeja (parametreilla)
+
+
 ### MMa 2025-03-19
 Tietokannan luotilausessa uusi admin taulu -> ajatuksena että vain adminit voivat lisätä ja poistaa kirjoja, omista kannoistaan ja tästä bridge storeihin
 
