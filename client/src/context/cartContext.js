@@ -17,7 +17,7 @@ export const CartProvider = ({ children }) => {
   };
 
   const removeFromCart = (bookId) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== bookId));
+    setCartItems((prevItems) => prevItems.filter((item) => item.book_id !== bookId));
   };
 
   const clearCart = () => {

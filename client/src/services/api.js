@@ -92,9 +92,20 @@ export const availableBooks = async () => {
 export const reserveBook = async (bookId) => {
     try {
       const response = await api.post("/purchase/reserve", { bookId });
-      return response.data; // HUOM tämä rivi on tärkein!
+      return response.data;
     } catch (error) {
       console.error("Virhe kirjan varaamisessa:", error);
       throw error.response?.data || { error: "Tuntematon virhe" };
     }
-  };
+};
+
+
+export const cancelReservation = async (bookId) => {
+  try {
+    const response = await api.post('/purchase/release', { bookId });
+    return response.data;
+  } catch (error) {
+    console.error('Virhe peruuttaessa varausta:', error);
+    throw error.response?.data?.error || "Varauksen peruutus epäonnistui";
+  }
+};

@@ -1,8 +1,31 @@
 import { useCart } from "../context/cartContext";
 import { Link } from "react-router-dom";
+import { cancelReservation } from "../services/api";
 
 export default function ShoppingCart() {
   const { cartItems, removeFromCart, clearCart } = useCart();
+
+  // Poista yksittäinen kirja + peruu varauksen
+  const handleRemoveItem = async (bookId) => {
+    try {
+      await cancelReservation(bookId);
+      removeFromCart(bookId);
+    } catch (err) {
+      alert("Varauksen peruutus epäonnistui: " + err);
+    }
+  };
+
+  // Tyhjennä koko ostoskori ja vapauta kaikki varaukset
+  const handleClearCart = async () => {
+    try {
+      for (const item of cartItems) {
+        await cancelReservation(item.book_id);
+      }
+      clearCart();
+    } catch (err) {
+      alert("Virhe tyhjentäessä ostoskoria: " + err);
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -34,7 +57,7 @@ export default function ShoppingCart() {
                   <td className="px-4 py-2 border">{item.weight} g</td>
                   <td className="px-4 py-2 border">
                     <button
-                      onClick={() => removeFromCart(item.book_id)}
+                      onClick={() => handleRemoveItem(item.book_id)}
                       className="text-red-600 hover:underline"
                     >
                       Poista
@@ -54,7 +77,7 @@ export default function ShoppingCart() {
               €
             </p>
             <button
-              onClick={clearCart}
+              onClick={handleClearCart}
               className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
             >
               Tyhjennä ostoskori
