@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { availableBooks, addToCart } from "../services/api"; 
+import { availableBooks, reserveBook } from "../services/api"; 
+import Swal from 'sweetalert2'; // siistimpi popup-ikkuna
 
 export default function Books() {
   const [books, setBooks] = useState([]);
@@ -99,11 +100,32 @@ export default function Books() {
 
   const handleAddToCart = async (book_id) => {
     try {
-      await addToCart(book_id);
-      alert("Kirja lisätty ostoskoriin!");
+      const result = await reserveBook(book_id);
+  
+      // Kauniimpi SweetAlert2-popup onnistuneelle varaukselle
+      await Swal.fire({
+        title: '✅ Keskusdivari',
+        text: result.message,
+        icon: 'success',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#3085d6'
+      });
+  
+      await fetchBooks();
+  
     } catch (error) {
-      console.error("Virhe lisätessä kirjaa ostoskoriin:", error);
-      alert("Virhe lisätessä kirjaa ostoskoriin.");
+      console.error("Backend-virhe:", error.response?.data || error);
+  
+      // SweetAlert2-popup virhetilanteelle
+      await Swal.fire({
+        title: '❌ Keskusdivari',
+        text: error.response?.data?.error || "Tuntematon virhe",
+        icon: 'error',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#d33'
+      });
+  
+      await fetchBooks();
     }
   };
 

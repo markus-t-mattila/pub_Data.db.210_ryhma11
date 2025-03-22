@@ -89,7 +89,12 @@ export const availableBooks = async () => {
     return api.get("/books/available");
 };
 
-export const addToCart = async (bookId) => {
-    console.log("Lisätään ostoskoriin kirja", bookId);
-    return api.post("/cart", { bookId });
-};
+export const reserveBook = async (bookId) => {
+    try {
+      const response = await api.post("/purchase/reserve", { bookId });
+      return response.data; // HUOM tämä rivi on tärkein!
+    } catch (error) {
+      console.error("Virhe kirjan varaamisessa:", error);
+      throw error.response?.data || { error: "Tuntematon virhe" };
+    }
+  };
