@@ -11,6 +11,7 @@ import storeRoutes from './routes/stores.js'; // Lisätty myymäläreitit
 import titleRoutes from './routes/tittle.js'; // Lisätty title-reitit
 import purchase from './routes/purchase.js'; // Lisätty ostosreitit
 import './controllers/utils.js';
+import shippingRoutes from './routes/shipping.js';
 
 
 // Lataa ympäristömuuttujat (varmista, että polku on oikein)
@@ -68,6 +69,8 @@ app.use('/stores', storeRoutes);
 app.use('/title', titleRoutes);
 
 app.use('/purchase', purchase);
+
+app.use('/shipping', shippingRoutes);
 
 // Testireitti, jolla frontend voi varmistaa, että backend toimii
 app.get("/", (req, res) => {
