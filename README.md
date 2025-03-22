@@ -4,6 +4,22 @@
 
 ========================================================================
 
+### MMa 2025-03-22
+
+* bakkiin lisäilty toimintoja suurin ominaisuus postikulujen laskenta ja optimointi
+* frontissa ostoskori toteutettu pitää kirjaa sinne tallennetuista tuotteista
+  * laskee tuotteiden yhteishinnan
+  * toimituskulujen esitys
+  * kokonaishinnan esitys
+* Mahdollisuus poistaa tuotteita ostokorista
+* Ostokorin voi tyhjentää kokonaisuudessaan
+* toimitus kulut päivittyvät tuotteiden mukaan
+* lisätty linkit kirja sivuille 
+  * löytyy ostokorista ja kirjat sivulta
+* Kirjat sivun toteutus
+  * mahdollisuus lisätä täältä ostoskoriin
+
+
 ### MMa 2025-03-21
 
 * Tietokanta rakennetta muutettu -> tyypin ja luokan takaa kommentoitu ID:t pois ja käytetään suoraan teksti arvoja
