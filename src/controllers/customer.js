@@ -187,7 +187,7 @@ export const loginCustomer = async (req, res) => {
       `;
       const result = await pool.query(query, [userId]);
       if (result.rowCount === 0) {
-        return res.status(404).json({ error: 'Ei löytynyt käyttäjää' });
+        return res.status(404).json({ error: 'Not found' });
       }
   
       return res.json(result.rows[0]);

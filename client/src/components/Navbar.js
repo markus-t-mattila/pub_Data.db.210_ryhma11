@@ -17,8 +17,8 @@ export default function Navbar() {
   };
 
   const handleLogout = () => {
-    logout(); // Kirjaa ulos, asettaa isLoggedIn=false tms.
-    navigate("/"); // palaa vaikka etusivulle
+    logout(); // Kirjaa ulos
+    navigate("/"); // palaa etusivulle
   };
 
   return (
@@ -27,7 +27,7 @@ export default function Navbar() {
 
         {/* Logo / Nimi */}
         <div className="text-xl font-bold">
-          <Link to="/">📚 Keskusdivari</Link>
+          <Link to="/books">📚 Keskusdivari</Link>
         </div>
 
         {/* Keskiosan navigointilinkit */}

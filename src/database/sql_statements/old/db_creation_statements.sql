@@ -18,7 +18,7 @@ CREATE TYPE status_enum AS ENUM (
 
 -- book type
 CREATE TABLE IF NOT EXISTS book_type (
-  id    UUID    PRIMARY KEY DEFAULT uuid_generate_v4(),
+  -- id    UUID    PRIMARY KEY DEFAULT uuid_generate_v4(),
   name  TEXT    UNIQUE NOT NULL
 );
 
@@ -30,7 +30,7 @@ INSERT INTO book_type (name) VALUES
 
 -- book genre / class
 CREATE TABLE IF NOT EXISTS book_class (
-  id    UUID    PRIMARY KEY DEFAULT uuid_generate_v4(),
+  --id    UUID    PRIMARY KEY DEFAULT uuid_generate_v4(),
   name  TEXT    UNIQUE NOT NULL
 );
 
@@ -92,19 +92,21 @@ CREATE TABLE IF NOT EXISTS title (
   publisher     TEXT            NOT NULL,
   year          NUMERIC(4),
   weight        NUMERIC(6)      NOT NULL,
-  type_id       UUID            NOT NULL,
-  class_id      UUID            NOT NULL,
+  --type_id       UUID            NOT NULL,
+  --class_id      UUID            NOT NULL,
+  type       TEXT            NOT NULL, --otetaan suoraan arvo -> id tässä mielestäni turha
+  class      TEXT            NOT NULL, --otetaan suoraan arvo -> id tässä mielestäni turha
   created_at    TIMESTAMP       NOT NULL,
   modified_at   TIMESTAMP       NOT NULL,
 
-  CONSTRAINT fk_type_id
-    FOREIGN KEY (type_id)
-    REFERENCES book_type (id)
+  CONSTRAINT fk_type
+    FOREIGN KEY (type)
+    REFERENCES book_type (name)
     ON DELETE RESTRICT,
 
-  CONSTRAINT fk_class_id
-    FOREIGN KEY (class_id)
-    REFERENCES book_class (id)
+  CONSTRAINT fk_class
+    FOREIGN KEY (class)
+    REFERENCES book_class (name)
     ON DELETE RESTRICT
 );
 
@@ -175,6 +177,32 @@ CREATE TABLE IF NOT EXISTS shipment_item (
     FOREIGN KEY (book_id)
     REFERENCES book (id)
     ON DELETE RESTRICT
+);
+
+-- new table for admins
+CREATE TABLE IF NOT EXISTS admin (
+  id          UUID          PRIMARY KEY DEFAULT uuid_generate_v4(),
+  email       VARCHAR(100)  NOT NULL,
+  passwrd     TEXT          NOT NULL,
+  is_central  BOOLEAN       NOT NULL DEFAULT FALSE -- central admin has rights to all stores
+);
+
+-- bridge table for admins and stores
+CREATE TABLE IF NOT EXISTS admin_store (
+  admin_id   UUID  NOT NULL,
+  store_id   UUID  NOT NULL,
+
+  PRIMARY KEY (admin_id, store_id),
+
+  CONSTRAINT fk_admin_store_admin
+    FOREIGN KEY (admin_id)
+    REFERENCES admin (id)
+    ON DELETE CASCADE,
+
+  CONSTRAINT fk_admin_store_store
+    FOREIGN KEY (store_id)
+    REFERENCES store (id)
+    ON DELETE CASCADE
 );
 
 /* -- single_db

@@ -6,6 +6,9 @@ import pool from "./config/db.js"; // Tietokantayhteys
 import bookRoutes from './routes/bookRoutes.js';
 import customer from './routes/customer.js'; // Lisätty asiakasreitit
 import file from './routes/file.js';
+import adminRoutes from './routes/admin.js'; // Lisätty adminreitit
+import storeRoutes from './routes/stores.js'; // Lisätty myymäläreitit
+import titleRoutes from './routes/tittle.js'; // Lisätty title-reitit
 
 
 // Lataa ympäristömuuttujat (varmista, että polku on oikein)
@@ -28,6 +31,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
+    httpOnly: true,
     secure: false,    // true vain HTTPS:llä
     maxAge: 1000 * 60 * 60  // esim. 1 tunti
   }
@@ -51,6 +55,15 @@ app.use('/customers', customer);
 
 // Käytä tiedostoreittejä
 app.use('/uploads', file);
+
+// admin reitit
+app.use('/admin', adminRoutes);
+
+// Stores-reitit
+app.use('/stores', storeRoutes);
+
+// Title-reitit
+app.use('/title', titleRoutes);
 
 // Testireitti, jolla frontend voi varmistaa, että backend toimii
 app.get("/", (req, res) => {

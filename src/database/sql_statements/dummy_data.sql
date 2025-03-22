@@ -18,13 +18,13 @@ INSERT INTO purchase (id, date, total_price, shipping_price, customer_id, create
 ('b4444444-4444-4444-4444-444444444444', NOW() - INTERVAL '3 days', 65.00, 5.00, '44444444-4444-4444-4444-444444444444', NOW() - INTERVAL '3 days', NOW() - INTERVAL '3 days'),
 ('b5555555-5555-5555-5555-555555555555', NOW() - INTERVAL '1 days', 95.00, 10.00, '55555555-5555-5555-5555-555555555555', NOW() - INTERVAL '1 days', NOW() - INTERVAL '1 days');
 
-INSERT INTO title (id, isbn, name, writer, publisher, year, weight, type_id, class_id, created_at, modified_at) VALUES
-('d1111111-1111-1111-1111-111111111111', '9789510000001', 'Suden ja Karhun Tarina', 'Mika Miettinen', 'Suomen Kustannus', 2010, 500, (SELECT id FROM book_type WHERE name = 'HARDCOVER'), (SELECT id FROM book_class WHERE name = 'FICTION'), NOW(), NOW()),
-('d2222222-2222-2222-2222-222222222222', '9789510000002', 'Kettu ja Rähmä', 'Laura Laine', 'Otava', 2015, 350, (SELECT id FROM book_type WHERE name = 'PAPERBACK'), (SELECT id FROM book_class WHERE name = 'NONFICTION'), NOW(), NOW()),
-('d3333333-3333-3333-3333-333333333333', '9789510000003', 'Taikojen Aika', 'Jussi Järvinen', 'WSOY', 2018, 400, (SELECT id FROM book_type WHERE name = 'CARTOON'), (SELECT id FROM book_class WHERE name = 'COMIC'), NOW(), NOW()),
-('d4444444-4444-4444-4444-444444444444', '9789510000004', 'Yön Salaisuudet', 'Anniina Aalto', 'Tammi', 2020, 450, (SELECT id FROM book_type WHERE name = 'HARDCOVER'), (SELECT id FROM book_class WHERE name = 'OTHER'), NOW(), NOW()),
-('d5555555-5555-5555-5555-555555555555', '9789510000005', 'Kesän Lumous', 'Kari Kallio', 'WSOY', 2012, 380, (SELECT id FROM book_type WHERE name = 'PAPERBACK'), (SELECT id FROM book_class WHERE name = 'FICTION'), NOW(), NOW()),
-('d6666666-6666-6666-6666-666666666666', '9789510000006', 'Talven Tarina', 'Sanna Salmi', 'Otava', 2016, 420, (SELECT id FROM book_type WHERE name = 'OTHER'), (SELECT id FROM book_class WHERE name = 'NONFICTION'), NOW(), NOW());
+INSERT INTO title (id, isbn, name, writer, publisher, year, weight, type, class, created_at, modified_at) VALUES
+('d1111111-1111-1111-1111-111111111111', '9789510000001', 'Suden ja Karhun Tarina', 'Mika Miettinen', 'Suomen Kustannus', 2010, 500, 'HARDCOVER', 'FICTION', NOW(), NOW()),
+('d2222222-2222-2222-2222-222222222222', '9789510000002', 'Kettu ja Rähmä', 'Laura Laine', 'Otava', 2015, 350, 'PAPERBACK', 'NONFICTION', NOW(), NOW()),
+('d3333333-3333-3333-3333-333333333333', '9789510000003', 'Taikojen Aika', 'Jussi Järvinen', 'WSOY', 2018, 400, 'CARTOON', 'COMIC', NOW(), NOW()),
+('d4444444-4444-4444-4444-444444444444', '9789510000004', 'Yön Salaisuudet', 'Anniina Aalto', 'Tammi', 2020, 450, 'HARDCOVER', 'OTHER', NOW(), NOW()),
+('d5555555-5555-5555-5555-555555555555', '9789510000005', 'Kesän Lumous', 'Kari Kallio', 'WSOY', 2012, 380, 'PAPERBACK', 'FICTION', NOW(), NOW()),
+('d6666666-6666-6666-6666-666666666666', '9789510000006', 'Talven Tarina', 'Sanna Salmi', 'Otava', 2016, 420, 'OTHER', 'NONFICTION', NOW(), NOW());
 
 INSERT INTO book (id, title_id, purchase_id, store_id, condition, purchase_price, sale_price, status, created_at, modified_at) VALUES
 ('e1111111-1111-1111-1111-111111111111', 'd1111111-1111-1111-1111-111111111111', 'b1111111-1111-1111-1111-111111111111', 'a1111111-1111-1111-1111-111111111111', 'GOOD', 20.00, 30.00, 'SOLD', NOW(), NOW()),
