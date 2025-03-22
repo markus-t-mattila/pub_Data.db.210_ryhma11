@@ -13,6 +13,7 @@ import AdminLogin from "./pages/AdminLogin"; // Admin-kirjautumissivu
 import AdminDashboard from "./pages/AdminDashboard";
 import { AuthProvider } from './context/AuthContext';
 import { AdminAuthProvider } from "./context/AdminAuthContext";
+import { CartProvider } from './context/cartContext';
 
 export default function App() {
 
@@ -24,7 +25,9 @@ export default function App() {
           path="/*"
           element={
             <AuthProvider>
-              <Layout />
+              <CartProvider>
+                <Layout />
+              </CartProvider>
             </AuthProvider>
           }
         >

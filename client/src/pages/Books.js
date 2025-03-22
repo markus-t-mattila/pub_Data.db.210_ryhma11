@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { availableBooks, reserveBook } from "../services/api"; 
 import Swal from 'sweetalert2'; // siistimpi popup-ikkuna
+import { useCart } from '../context/cartContext';
 
 export default function Books() {
   const [books, setBooks] = useState([]);
@@ -98,9 +99,13 @@ export default function Books() {
     }));
   };
 
+  const { addToCart } = useCart();
   const handleAddToCart = async (book_id) => {
     try {
       const result = await reserveBook(book_id);
+      
+
+      addToCart(result.book);
   
       // Kauniimpi SweetAlert2-popup onnistuneelle varaukselle
       await Swal.fire({
