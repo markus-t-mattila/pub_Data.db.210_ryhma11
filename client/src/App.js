@@ -14,6 +14,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import { AuthProvider } from './context/AuthContext';
 import { AdminAuthProvider } from "./context/AdminAuthContext";
 import { CartProvider } from './context/cartContext';
+import ShoppingCart from "./pages/ShoppingCart";
 
 export default function App() {
 
@@ -39,6 +40,8 @@ export default function App() {
           <Route path="customers-stats" element={<CustomersStats />} />
           <Route path="profile" element={<Profile />} />
           <Route path="books" element={<Books />} />
+          <Route path="shopping-cart" element={<ShoppingCart />} />
+
         </Route>
 
 
