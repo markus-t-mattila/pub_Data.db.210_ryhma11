@@ -1,8 +1,8 @@
-import pool from '../config/db.js';
+import cron from 'node-cron';
+import { releaseExpiredReservations } from './purchase.js';
 
-const query = `
-    SELECT name
-    FROM book_type`;
-
-const {rows} = await pool.query(query);
-console.log(rows);
+// Aja joka minuutti
+cron.schedule('* * * * *', () => {
+  console.log('Tarkistetaan vanhentuneet varaukset...');
+  releaseExpiredReservations();
+});

@@ -68,3 +68,8 @@ CREATE TABLE IF NOT EXISTS d1_divari.book (
     REFERENCES d1_divari.title (id)
     ON DELETE RESTRICT
 );
+
+-- lisäys tehostamaan varauten vapautusta
+CREATE INDEX IF NOT EXISTS idx_d1_reserved_books_modified_at
+ON d1_divari.book (modified_at)
+WHERE status = 'RESERVED';

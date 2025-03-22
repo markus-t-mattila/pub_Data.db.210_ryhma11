@@ -120,6 +120,14 @@ CREATE TABLE IF NOT EXISTS book (
     ON DELETE CASCADE
 );
 
+
+-- lisäys tehostamaan varauten vapautusta
+CREATE INDEX IF NOT EXISTS idx_d1_reserved_books_modified_at
+ON book (modified_at)
+WHERE status = 'RESERVED';
+
+
+
 CREATE TABLE IF NOT EXISTS shipping (
   max_weight   NUMERIC(6)      PRIMARY KEY,
   price        NUMERIC(4,2)    NOT NULL
@@ -160,3 +168,4 @@ CREATE TABLE IF NOT EXISTS shipment_item (
     REFERENCES book (id)
     ON DELETE RESTRICT
 );
+
