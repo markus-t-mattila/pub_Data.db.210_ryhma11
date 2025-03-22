@@ -40,15 +40,14 @@ export const searchBooks = async (req, res) => {
 export const titlesByClass = async (req, res) => {
   const query = `
     SELECT 
-      bc.name AS class,
+      t.class,
       COUNT(b.id) AS count,
       SUM(b.sale_price) AS total_price,
       AVG(b.sale_price) AS average_price
     FROM book b
     INNER JOIN title t ON b.title_id = t.id
-    INNER JOIN book_class bc ON bc.id = t.class_id
     WHERE b.status = 'AVAILABLE'
-    GROUP BY bc.id;
+    GROUP BY t.class;
   `
   try {
     const { rows } = await pool.query(query);

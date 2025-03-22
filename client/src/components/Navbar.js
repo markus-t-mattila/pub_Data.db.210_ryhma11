@@ -51,8 +51,9 @@ export default function Navbar() {
               </button>
             </>
           )}
-          <Link to="/classes" className="hover:underline">Teosluokat</Link>
           <Link to="/customers-stats" className="hover:underline">Käyttäjätilastot</Link>
+          <Link to="/classes" className="hover:underline">Teosluokat</Link>
+          <Link to="/books" className="hover:underline">Saatavilla olevat kirjat</Link>
         </div>
 
         {/* Hakukenttä ja hae-painike, näkyy aina */}
