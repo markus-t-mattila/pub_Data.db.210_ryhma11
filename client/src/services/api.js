@@ -109,3 +109,15 @@ export const cancelReservation = async (bookId) => {
     throw error.response?.data?.error || "Varauksen peruutus epäonnistui";
   }
 };
+
+export const getBookById = async (id) => {
+    try {
+      const response = await api.get(`/books`, {
+        params: { book_id: id }
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Virhe yksittäisen kirjan haussa:", error);
+      throw error;
+    }
+  };

@@ -51,7 +51,11 @@ export default function ShoppingCart() {
             <tbody>
               {cartItems.map((item) => (
                 <tr key={item.book_id} className="text-center">
-                  <td className="px-4 py-2 border">{item.title_name}</td>
+                  <td className="px-4 py-2 border">
+                    <Link to={`/book/${item.book_id}`} className="text-blue-600 hover:underline">
+                      {item.title_name}
+                    </Link>
+                  </td>
                   <td className="px-4 py-2 border">{parseFloat(item.sale_price).toFixed(2)}</td>
                   <td className="px-4 py-2 border">{item.condition}</td>
                   <td className="px-4 py-2 border">{item.weight} g</td>

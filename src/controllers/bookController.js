@@ -99,7 +99,8 @@ export const queryBooks = async (req, res) => {
     max_year: { column: 't.year', operator: '<=', wrapLike: false },
     status: { column: 'b.status', operator: '=', wrapLike: false },
     title_id: { column: 't.id', operator: '=', wrapLike: false },
-    book_id: { column: 'b.id', operator: '=', wrapLike: false }
+    book_id: { column: 'b.id', operator: '=', wrapLike: false },
+    shop: { column: 's.name', operator: '=', wrapLike: true }
   };
 
   const conditions = []; // SQL-ehdot
@@ -135,9 +136,15 @@ export const queryBooks = async (req, res) => {
       t.type,
       t.class,
       b.sale_price,
-      t.isbn
+      t.isbn,
+      b.condition,
+      s.name AS store,
+      s.email AS store_email,
+      s.phone_num AS store_phone
+
     FROM book b
     JOIN title t ON b.title_id = t.id
+    JOIN store s ON b.store_id = s.id
     ${whereClause}
     ORDER BY t.name ASC
   `;

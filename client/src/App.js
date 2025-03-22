@@ -15,6 +15,7 @@ import { AuthProvider } from './context/AuthContext';
 import { AdminAuthProvider } from "./context/AdminAuthContext";
 import { CartProvider } from './context/cartContext';
 import ShoppingCart from "./pages/ShoppingCart";
+import SingleBook from "./pages/SingleBook";
 
 export default function App() {
 
@@ -41,6 +42,7 @@ export default function App() {
           <Route path="profile" element={<Profile />} />
           <Route path="books" element={<Books />} />
           <Route path="shopping-cart" element={<ShoppingCart />} />
+          <Route path="book/:id" element={<SingleBook />} />
 
         </Route>
 

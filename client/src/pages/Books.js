@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { availableBooks, reserveBook } from "../services/api"; 
 import Swal from 'sweetalert2'; // siistimpi popup-ikkuna
 import { useCart } from '../context/cartContext';
@@ -201,7 +202,18 @@ export default function Books() {
                           </button>
                         )}
                       </td>
-                      <td className="border p-2">{group.name}</td>
+                      <td className="border p-2">
+                        {group.count === 1 ? (
+                          <Link
+                            to={`/book/${group.books[0].book_id}`}
+                            className="text-blue-600 hover:underline"
+                          >
+                            {group.name}
+                          </Link>
+                        ) : (
+                          group.name
+                        )}
+                      </td>
                       <td className="border p-2">{group.writer}</td>
                       <td className="border p-2">{group.year}</td>
                       <td className="border p-2">{group.type}</td>
@@ -224,7 +236,11 @@ export default function Books() {
                             >🛒
                             </button>
                           </td>
-                          <td className="border p-2 pl-8">{book.name}</td>
+                          <td className="border p-2">
+                            <Link to={`/book/${book.book_id}`} className="text-blue-600 hover:underline">
+                              {book.name}
+                            </Link>
+                          </td>
                           <td className="border p-2">{book.writer}</td>
                           <td className="border p-2">{book.year}</td>
                           <td className="border p-2">{book.type}</td>
