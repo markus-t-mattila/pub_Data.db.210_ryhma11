@@ -104,3 +104,47 @@ export const releaseExpiredReservations = async () => {
       client.release();
     }
   };
+
+
+  export const cancelReservation = async (req, res) => {
+    const { bookId } = req.body;
+  
+    if (!bookId) {
+      return res.status(400).json({ error: 'bookId puuttuu' });
+    }
+  
+    const client = await pool.connect();
+  
+    try {
+      await client.query('BEGIN');
+  
+      const result = await client.query(
+        `
+        UPDATE book
+        SET status = 'AVAILABLE', modified_at = NOW()
+        WHERE id = $1 AND (status = 'RESERVED' OR status = 'AVAILABLE')
+        RETURNING id;
+        `,
+        [bookId]
+      );
+  
+      if (result.rowCount === 0) {
+        await client.query('ROLLBACK');
+        return res.status(400).json({ error: 'Varausta ei löytynyt tai kirjaa ei voi peruuttaa.' });
+      }
+  
+      await client.query('COMMIT');
+  
+      return res.status(200).json({
+        message: 'Varaus peruutettu ja kirja asetettu takaisin saataville.',
+        book_id: result.rows[0].id
+      });
+  
+    } catch (error) {
+      await client.query('ROLLBACK');
+      console.error('Virhe varauksen peruutuksessa:', error.message);
+      return res.status(500).json({ error: 'Server Error: ' + error.message });
+    } finally {
+      client.release();
+    }
+  };
