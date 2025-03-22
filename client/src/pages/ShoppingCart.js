@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { cancelReservation } from "../services/api";
 
 export default function ShoppingCart() {
-  const { cartItems, removeFromCart, clearCart } = useCart();
+  const { cartItems, shippingCost, removeFromCart, clearCart } = useCart();
 
   // Poista yksittäinen kirja + peruu varauksen
   const handleRemoveItem = async (bookId) => {
@@ -26,6 +26,9 @@ export default function ShoppingCart() {
       alert("Virhe tyhjentäessä ostoskoria: " + err);
     }
   };
+
+  const totalShippingCost =  shippingCost?.totalCost || 0;
+  console.log("totalShippingCost:", totalShippingCost);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -72,14 +75,39 @@ export default function ShoppingCart() {
             </tbody>
           </table>
 
-          <div className="flex justify-between items-center mt-6">
-            <p className="font-semibold">
-              Yhteensä:{" "}
-              {cartItems
-                .reduce((sum, item) => sum + parseFloat(item.sale_price), 0)
-                .toFixed(2)}{" "}
-              €
-            </p>
+          <div className="mt-8 p-4 border border-gray-300 rounded bg-gray-50">
+            <h3 className="text-lg font-semibold mb-4">Yhteenveto</h3>
+          
+            <div className="flex justify-between mb-2">
+              <span>Tuotteiden hinta yhteensä:</span>
+              <span>
+                {cartItems
+                  .reduce((sum, item) => sum + parseFloat(item.sale_price), 0)
+                  .toFixed(2)} €
+              </span>
+            </div>
+          
+            <div className="flex justify-between mb-2">
+              <span>Toimituskulut yhteensä:</span>
+              <span>
+                {shippingCost && shippingCost.totalCost > 0 
+                 ? `${shippingCost.totalCost.toFixed(2)} €`
+                 : 'Lasketaan...'}
+              </span>
+            </div>
+          
+            <div className="flex justify-between font-bold text-lg border-t border-gray-300 pt-2">
+              <span>Kokonaishinta:</span>
+              <span>
+                {shippingCost && shippingCost.totalCost > 0
+                  ? `${(
+                    cartItems.reduce((sum, item) => sum + parseFloat(item.sale_price), 0) +
+                    shippingCost.totalCost
+                    ).toFixed(2)} €`
+                  : 'Lasketaan...'}
+              </span>
+            </div>
+
             <button
               onClick={handleClearCart}
               className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"

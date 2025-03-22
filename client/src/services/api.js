@@ -3,7 +3,7 @@ import axios from "axios";
 export const BASE_URL = "http://localhost:3000";
 
 
-const api = axios.create({
+export const api = axios.create({
     baseURL: BASE_URL,
     withCredentials: true,
   });
@@ -118,6 +118,16 @@ export const getBookById = async (id) => {
       return response.data;
     } catch (error) {
       console.error("Virhe yksittäisen kirjan haussa:", error);
+      throw error;
+    }
+};
+
+export const calculateShippingCost = async (weights) => {
+    try {
+      const response = await api.post(`/shipping/delivery-cost`, { weights });
+      return response.data;
+    } catch (error) {
+      console.error("Calculation Error:", error);
       throw error;
     }
   };
