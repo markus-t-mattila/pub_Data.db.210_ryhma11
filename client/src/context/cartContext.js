@@ -1,5 +1,5 @@
-import { createContext, useState, useContext, useEffect } from 'react';
-import { calculateShippingCost } from '../services/api';
+import { createContext, useState, useContext, useEffect, useRef } from 'react';
+import { calculateShippingCost, extendReservation } from '../services/api';
 
 const CartContext = createContext();
 
@@ -9,34 +9,17 @@ export const CartProvider = ({ children }) => {
     return savedCart ? JSON.parse(savedCart) : [];
   });
 
-  // tila toimituskuluille
   const [shippingCost, setShippingCost] = useState({ totalCost: 0, batches: [] });
-  const [oldestTimestamp, setOldestTimestamp] = useState(null);
   const [reservationExpired, setReservationExpired] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(null); // sekunteina
 
-  // Kuuntele viesti popupilta
-  useEffect(() => {
-    const handleMessage = (event) => {
-      if (event.data === "reservation-declined") {
-        clearCart();
-        setReservationExpired(true);
-      }
+  const oldestTimestampRef = useRef(null);
 
-      if (event.data === "reservation-extended") {
-        const updatedCart = JSON.parse(localStorage.getItem("cartItems"));
-        setCartItems(updatedCart);
-        setReservationExpired(false);
-      }
-    };
-
-    window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
-  }, []);
-
-  // Päivitä vanhin aikaleima kun ostoskori muuttuu
+  // Päivitä vanhin timestamp ja käynnistä varauskello
   useEffect(() => {
     if (cartItems.length === 0) {
-      setOldestTimestamp(null);
+      oldestTimestampRef.current = null;
+      setTimeLeft(null);
       return;
     }
 
@@ -45,61 +28,63 @@ export const CartProvider = ({ children }) => {
       return (!oldest || current < oldest) ? current : oldest;
     }, null);
 
-    setOldestTimestamp(oldest);
+    oldestTimestampRef.current = oldest;
+    setReservationExpired(false);
   }, [cartItems]);
 
-  // Kello joka valvoo varausaikaa
+  // Sekuntikello joka laskee aikaa
   useEffect(() => {
-    if (!oldestTimestamp) return;
-
     const interval = setInterval(() => {
-      const elapsed = (Date.now() - new Date(oldestTimestamp).getTime()) / 1000;
+      if (!oldestTimestampRef.current) return;
 
-      if (elapsed >= 240 && elapsed < 245 && !window.reservationPrompted) {
-        window.reservationPrompted = true;
-        window.open("/popup/extend-reservation", "_blank", "width=500,height=300");
-      }
+      const elapsed = (Date.now() - new Date(oldestTimestampRef.current).getTime()) / 1000;
+      const remaining = Math.max(299 - elapsed, 0); // max 5 min (299s)
 
-      if (elapsed >= 299) {
+      setTimeLeft(remaining);
+
+      if (remaining <= 0 && cartItems.length > 0) {
         clearCart();
         setReservationExpired(true);
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [oldestTimestamp]);
+  }, [cartItems]);
 
-  // Päivittäa toimituskulut aina kun ostoskori muuttuu
+  // Toimituskulut
   useEffect(() => {
-      const fetchShippingCost = async () => {
-        try {
-          const weights = cartItems.map(item => Number(item.weight));
+    const fetchShippingCost = async () => {
+      try {
+        const weights = cartItems.map(item => Number(item.weight));
 
-          if (weights.length === 0) {
-            setShippingCost({ totalCost: 0, batches: [] });
-            return;
-          }
-  
-          const response = await calculateShippingCost(weights);
-          //console.log('response:', response);
-          setShippingCost({
-            totalCost: response.totalCost,
-            batches: response.batches
-          });
-        } catch (error) {
-          console.error('Virhe toimituskulujen laskennassa:', error);
+        if (weights.length === 0) {
           setShippingCost({ totalCost: 0, batches: [] });
+          return;
         }
-      };
-  
-      fetchShippingCost();
-    }, [cartItems]);
+
+        const response = await calculateShippingCost(weights);
+        setShippingCost({
+          totalCost: response.totalCost,
+          batches: response.batches
+        });
+      } catch (error) {
+        console.error('Virhe toimituskulujen laskennassa:', error);
+        setShippingCost({ totalCost: 0, batches: [] });
+      }
+    };
+
+    fetchShippingCost();
+  }, [cartItems]);
 
   useEffect(() => {
     localStorage.setItem('cartItems', JSON.stringify(cartItems));
   }, [cartItems]);
 
   const addToCart = (book) => {
+    console.log("Lisätty kirja ostoskoriin:", {
+      book_id: book.book_id,
+      modified_at: book.modified_at
+    });
     setCartItems((prevItems) => [...prevItems, book]);
   };
 
@@ -111,10 +96,43 @@ export const CartProvider = ({ children }) => {
     setCartItems([]);
     setShippingCost({ totalCost: 0, batches: [] });
     localStorage.removeItem('cartItems');
+    setTimeLeft(null);
+  };
+
+  const extendCurrentReservation = async () => {
+    try {
+      const payload = {
+        books: cartItems.map((item) => ({
+          book_id: item.book_id,
+          modified_at: item.modified_at
+        })),
+      };
+
+      const response = await extendReservation(payload);
+      console.log("extendCurrentReservation response:", response);
+      if (response.updatedBooks) {
+        setCartItems(response.updatedBooks);
+        setReservationExpired(false);
+        console.log("Varausta jatkettu.");
+      } else {
+        console.warn("Varausta ei voitu jatkaa.");
+      }
+    } catch (error) {
+      console.error("Virhe varauksen jatkamisessa:", error);
+    }
   };
 
   return (
-    <CartContext.Provider value={{ cartItems, shippingCost, addToCart, removeFromCart, clearCart, reservationExpired }}>
+    <CartContext.Provider value={{
+      cartItems,
+      shippingCost,
+      addToCart,
+      removeFromCart,
+      clearCart,
+      reservationExpired,
+      timeLeft,
+      extendReservation: extendCurrentReservation
+    }}>
       {children}
     </CartContext.Provider>
   );

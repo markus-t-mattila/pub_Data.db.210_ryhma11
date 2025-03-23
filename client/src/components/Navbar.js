@@ -10,7 +10,7 @@ export default function Navbar() {
   const { isLoggedIn, logout, login } = useContext(AuthContext);
   const { cartItems } = useCart();
 
-  console.log("Navbar cartItems:", cartItems);
+  //console.log("Navbar cartItems:", cartItems);
 
   const handleSearch = (e) => {
     e.preventDefault();

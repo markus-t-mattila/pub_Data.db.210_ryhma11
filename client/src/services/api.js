@@ -131,3 +131,8 @@ export const calculateShippingCost = async (weights) => {
       throw error;
     }
   };
+
+  export const extendReservation = async (data) => {
+    const response = await api.post("/purchase/extend-reservation", data);
+    return response.data;
+  };

@@ -1,12 +1,14 @@
 import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
+import ReservationBar from "./ReservetionBar";
 
 export default function Layout() {
   return (
-    <div>
+    <div className="min-h-screen flex flex-col">
+      <ReservationBar />
       <Navbar />
-      <div className="container mx-auto p-6">
-        <Outlet /> {/* Tämä vaihtuu eri sivujen sisällöksi */}
+      <div className="container mx-auto p-6 flex-grow">
+        <Outlet />
       </div>
     </div>
   );

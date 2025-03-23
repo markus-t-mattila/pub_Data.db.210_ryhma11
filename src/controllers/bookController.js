@@ -138,6 +138,7 @@ export const queryBooks = async (req, res) => {
       b.sale_price,
       t.isbn,
       b.condition,
+      b.modified_at,
       s.name AS store,
       s.email AS store_email,
       s.phone_num AS store_phone

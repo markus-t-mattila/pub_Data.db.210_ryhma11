@@ -21,10 +21,11 @@ export default function Books() {
     isbn: "",
     weight: ""
   });
+  const { addToCart, cartItems } = useCart();
 
   useEffect(() => {
     fetchBooks();
-  }, []);
+  }, [cartItems]);
 
   const fetchBooks = async () => {
     setLoading(true);
@@ -100,7 +101,6 @@ export default function Books() {
     }));
   };
 
-  const { addToCart } = useCart();
   const handleAddToCart = async (book_id) => {
     try {
       const result = await reserveBook(book_id);

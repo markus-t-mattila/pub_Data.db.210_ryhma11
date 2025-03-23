@@ -55,7 +55,8 @@ export const reserveBook = async (req, res) => {
         title_name: title.name,
         sale_price: book.sale_price,
         condition: book.condition,
-        weight: title.weight
+        weight: title.weight,
+        modified_at: book.modified_at
       }
     });
 
@@ -151,6 +152,7 @@ export const releaseExpiredReservations = async () => {
 
   export const extendReservationTime = async (req, res) => {
     const { books } = req.body;
+    console.log(books);
   
     if (!books || !Array.isArray(books)) {
       return res.status(400).json({ error: "Virheellinen pyyntö, books puuttuu tai ei ole taulukko." });
@@ -165,13 +167,15 @@ export const releaseExpiredReservations = async () => {
   
       for (const book of books) {
         const { book_id, modified_at } = book;
-  
+        console.log(book_id, modified_at);
         const result = await client.query(
           `
           UPDATE book
           SET modified_at = NOW()
-          WHERE id = $1 AND status = 'RESERVED' AND modified_at = $2
-          RETURNING id, isbn, condition, sale_price;
+          WHERE id = $1
+            AND status = 'RESERVED'
+            AND DATE_TRUNC('second', modified_at) = DATE_TRUNC('second', $2::timestamptz)
+          RETURNING id, title_id, condition, sale_price;
           `,
           [book_id, modified_at]
         );
@@ -186,8 +190,8 @@ export const releaseExpiredReservations = async () => {
         const titleResult = await client.query(`
           SELECT name, weight
           FROM title
-          WHERE isbn = $1;
-        `, [updated.isbn]);
+          WHERE id = $1;
+        `, [updated.title_id]);
   
         if (titleResult.rowCount === 0) {
           await client.query("ROLLBACK");
