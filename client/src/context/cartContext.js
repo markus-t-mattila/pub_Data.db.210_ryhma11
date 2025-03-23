@@ -38,7 +38,7 @@ export const CartProvider = ({ children }) => {
       if (!oldestTimestampRef.current) return;
 
       const elapsed = (Date.now() - new Date(oldestTimestampRef.current).getTime()) / 1000;
-      const remaining = Math.max(299 - elapsed, 0); // max 5 min (299s)
+      const remaining = Math.max(298 - elapsed, 0); // max 5 min (299s)
 
       setTimeLeft(remaining);
 
@@ -52,44 +52,45 @@ export const CartProvider = ({ children }) => {
   }, [cartItems]);
 
   // Toimituskulut
-  useEffect(() => {
-    const fetchShippingCost = async () => {
-      try {
-        const weights = cartItems.map(item => Number(item.weight));
-
-        if (weights.length === 0) {
-          setShippingCost({ totalCost: 0, batches: [] });
-          return;
-        }
-
-        const response = await calculateShippingCost(weights);
-        setShippingCost({
-          totalCost: response.totalCost,
-          batches: response.batches
-        });
-      } catch (error) {
-        console.error('Virhe toimituskulujen laskennassa:', error);
+  
+  const fetchShippingCost = async (items) => {
+    try {
+      const weights = items.map(item => Number(item.weight));
+      if (weights.length === 0) {
         setShippingCost({ totalCost: 0, batches: [] });
+        return;
       }
-    };
-
-    fetchShippingCost();
-  }, [cartItems]);
+      const response = await calculateShippingCost(weights);
+      setShippingCost({
+        totalCost: response.totalCost,
+        batches: response.batches
+      });
+    } catch (error) {
+      console.error('Virhe toimituskulujen laskennassa:', error);
+      setShippingCost({ totalCost: 0, batches: [] });
+    }
+  };
 
   useEffect(() => {
     localStorage.setItem('cartItems', JSON.stringify(cartItems));
   }, [cartItems]);
 
   const addToCart = (book) => {
+    const updatedCart = [...cartItems, book];
+    setCartItems(updatedCart);
+    fetchShippingCost(updatedCart);
     console.log("Lisätty kirja ostoskoriin:", {
       book_id: book.book_id,
       modified_at: book.modified_at
     });
-    setCartItems((prevItems) => [...prevItems, book]);
+    //setCartItems((prevItems) => [...prevItems, book]);
   };
 
   const removeFromCart = (bookId) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.book_id !== bookId));
+    const updatedCart = cartItems.filter((item) => item.book_id !== bookId);
+    setCartItems(updatedCart);
+    fetchShippingCost(updatedCart);
+    //setCartItems((prevItems) => prevItems.filter((item) => item.book_id !== bookId));
   };
 
   const clearCart = () => {

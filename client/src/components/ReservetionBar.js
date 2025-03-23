@@ -21,6 +21,7 @@ export default function ReservationBar() {
       clearCart();
     } catch (err) {
       alert("Virhe tyhjentäessä ostoskoria: " + err);
+      clearCart()
     }
   };
 

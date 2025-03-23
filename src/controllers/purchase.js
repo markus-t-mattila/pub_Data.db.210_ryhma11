@@ -79,15 +79,21 @@ export const releaseExpiredReservations = async () => {
   
       // Päivitä kaikki 5 minuuttia vanhemmat varaukset takaisin AVAILABLE-tilaan
       const result = await client.query(`
+        WITH expired AS (
+          SELECT id
+          FROM book
+          WHERE 
+            (status = 'RESERVED' OR (purchase_id IS NOT NULL AND status = 'AVAILABLE'))
+            AND modified_at <= (NOW() - INTERVAL '5 minutes')
+          FOR UPDATE SKIP LOCKED
+          LIMIT 100
+        )
         UPDATE book
         SET 
-            status = 'AVAILABLE', 
-            modified_at = NOW(),
-            purchase_id = NULL
-        WHERE 
-            (status = 'RESERVED' OR
-            (purchase_id IS NOT NULL AND status = 'AVAILABLE')) 
-          AND modified_at <= (NOW() - INTERVAL '5 minutes')
+          status = 'AVAILABLE',
+          modified_at = NOW(),
+          purchase_id = NULL
+        WHERE id IN (SELECT id FROM expired)
         RETURNING id;
       `);
   

@@ -11,7 +11,7 @@ export default function Profile() {
 
   useEffect(() => {
     if (!isLoggedIn) {
-      // Jos ei ole kirjautunut, ohjaa kirjautumissivulle (tai minne haluat)
+      // Jos ei ole kirjautunut, ohjaa kirjautumissivulle
       navigate("/login");
       return;
     }
