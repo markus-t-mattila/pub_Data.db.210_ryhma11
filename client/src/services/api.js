@@ -131,3 +131,13 @@ export const calculateShippingCost = async (weights) => {
       throw error;
     }
   };
+
+export const addBookWithTitle = async (book) => {
+    try {
+      const response = await api.post(`/books`, book);
+      return response;
+    } catch (error) {
+      console.error("Virhe kirjan lisäämisessä:", error);
+      throw error;
+    }
+}

@@ -12,6 +12,7 @@ export const registerAdmin = async (req, res) => {
       storeIds    // taulukko store-id:istä, joihin tavallinen admin liitetään
     } = req.body;
 
+    console.log('req.body',req.body);
     // Perusvalidointi
     if (!email || !password) {
       return res.status(400).json({ error: 'email, salasana ovat pakollisia.' });
