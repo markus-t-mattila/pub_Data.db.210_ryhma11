@@ -21,7 +21,7 @@ export const reserveBook = async (req, res) => {
         id = $1 AND 
         status = 'AVAILABLE' AND
         purchase_id IS NULL
-      RETURNING id, title_id, sale_price, condition;
+      RETURNING id, title_id, sale_price, condition, modified_at;
     `, [bookId]);
 
     if (result.rowCount === 0) {
@@ -144,6 +144,75 @@ export const releaseExpiredReservations = async () => {
       await client.query('ROLLBACK');
       console.error('Virhe varauksen peruutuksessa:', error.message);
       return res.status(500).json({ error: 'Server Error: ' + error.message });
+    } finally {
+      client.release();
+    }
+  };
+
+  export const extendReservationTime = async (req, res) => {
+    const { books } = req.body;
+  
+    if (!books || !Array.isArray(books)) {
+      return res.status(400).json({ error: "Virheellinen pyyntö, books puuttuu tai ei ole taulukko." });
+    }
+  
+    const client = await pool.connect();
+  
+    try {
+      await client.query("BEGIN");
+  
+      const updatedBooks = [];
+  
+      for (const book of books) {
+        const { book_id, modified_at } = book;
+  
+        const result = await client.query(
+          `
+          UPDATE book
+          SET modified_at = NOW()
+          WHERE id = $1 AND status = 'RESERVED' AND modified_at = $2
+          RETURNING id, isbn, condition, sale_price;
+          `,
+          [book_id, modified_at]
+        );
+  
+        if (result.rowCount === 0) {
+          await client.query("ROLLBACK");
+          return res.status(409).json({ error: `Kirjan ${book_id} varausta ei voitu jatkaa.` });
+        }
+  
+        const updated = result.rows[0];
+  
+        const titleResult = await client.query(`
+          SELECT name, weight
+          FROM title
+          WHERE isbn = $1;
+        `, [updated.isbn]);
+  
+        if (titleResult.rowCount === 0) {
+          await client.query("ROLLBACK");
+          return res.status(404).json({ error: 'Teoksen tiedot puuttuvat.' });
+        }
+  
+        const title = titleResult.rows[0];
+  
+        updatedBooks.push({
+          book_id: updated.id,
+          title_name: title.name,
+          sale_price: updated.sale_price,
+          condition: updated.condition,
+          weight: title.weight,
+          modified_at: new Date().toISOString()
+        });
+      }
+  
+      await client.query("COMMIT");
+      return res.status(200).json({ message: "Varauksia jatkettiin", updatedBooks });
+  
+    } catch (error) {
+      await client.query("ROLLBACK");
+      console.error("Virhe varauksen jatkamisessa:", error.message);
+      return res.status(500).json({ error: "Palvelinvirhe: " + error.message });
     } finally {
       client.release();
     }

@@ -11,6 +11,63 @@ export const CartProvider = ({ children }) => {
 
   // tila toimituskuluille
   const [shippingCost, setShippingCost] = useState({ totalCost: 0, batches: [] });
+  const [oldestTimestamp, setOldestTimestamp] = useState(null);
+  const [reservationExpired, setReservationExpired] = useState(false);
+
+  // Kuuntele viesti popupilta
+  useEffect(() => {
+    const handleMessage = (event) => {
+      if (event.data === "reservation-declined") {
+        clearCart();
+        setReservationExpired(true);
+      }
+
+      if (event.data === "reservation-extended") {
+        const updatedCart = JSON.parse(localStorage.getItem("cartItems"));
+        setCartItems(updatedCart);
+        setReservationExpired(false);
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, []);
+
+  // Päivitä vanhin aikaleima kun ostoskori muuttuu
+  useEffect(() => {
+    if (cartItems.length === 0) {
+      setOldestTimestamp(null);
+      return;
+    }
+
+    const oldest = cartItems.reduce((oldest, item) => {
+      const current = new Date(item.modified_at);
+      return (!oldest || current < oldest) ? current : oldest;
+    }, null);
+
+    setOldestTimestamp(oldest);
+  }, [cartItems]);
+
+  // Kello joka valvoo varausaikaa
+  useEffect(() => {
+    if (!oldestTimestamp) return;
+
+    const interval = setInterval(() => {
+      const elapsed = (Date.now() - new Date(oldestTimestamp).getTime()) / 1000;
+
+      if (elapsed >= 240 && elapsed < 245 && !window.reservationPrompted) {
+        window.reservationPrompted = true;
+        window.open("/popup/extend-reservation", "_blank", "width=500,height=300");
+      }
+
+      if (elapsed >= 299) {
+        clearCart();
+        setReservationExpired(true);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [oldestTimestamp]);
 
   // Päivittäa toimituskulut aina kun ostoskori muuttuu
   useEffect(() => {
@@ -52,10 +109,12 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = () => {
     setCartItems([]);
+    setShippingCost({ totalCost: 0, batches: [] });
+    localStorage.removeItem('cartItems');
   };
 
   return (
-    <CartContext.Provider value={{ cartItems, shippingCost, addToCart, removeFromCart, clearCart }}>
+    <CartContext.Provider value={{ cartItems, shippingCost, addToCart, removeFromCart, clearCart, reservationExpired }}>
       {children}
     </CartContext.Provider>
   );
