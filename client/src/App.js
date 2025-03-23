@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout"; // asiakkaan / peruskayttaja layout
 import AdminLayout from "./components/AdminLayout"; // Adminin sivujen layout
+import PopupLayout from "./components/PopupLayout";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -44,6 +45,21 @@ export default function App() {
           <Route path="shopping-cart" element={<ShoppingCart />} />
           <Route path="book/:id" element={<SingleBook />} />
 
+        </Route>
+
+        {/* Popup-käytössä ilman navbaria */}
+        <Route
+          path="/popup/*"
+          element={
+            <AuthProvider>
+              <CartProvider>
+                <PopupLayout />
+              </CartProvider>
+            </AuthProvider>
+          }
+        >
+          <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
         </Route>
 
 

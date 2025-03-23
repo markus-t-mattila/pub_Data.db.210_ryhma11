@@ -38,7 +38,12 @@ export default function Register() {
       // Esim. jos backend palauttaa { success: true, message: '...' }
       if (response.status === 201) {
         // Onnistuneen rekisteröinnin jälkeen siirrytään /login-näkymään
-        navigate("/login");
+        if (window.opener) {
+          navigate("/popup/login");
+        } else {
+          navigate("/login");
+        }
+        
       } else {
         // Jos success ei ole true, tulkitaan se virheeksi
         setError(response.data.error || "Rekisteröinti epäonnistui.");

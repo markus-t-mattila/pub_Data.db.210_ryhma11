@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useCart } from "../context/cartContext";
 import { ShoppingCartIcon } from "@heroicons/react/24/outline";
@@ -7,8 +7,9 @@ import { ShoppingCartIcon } from "@heroicons/react/24/outline";
 export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
-  const { isLoggedIn, logout } = useContext(AuthContext);
+  const { isLoggedIn, logout, login } = useContext(AuthContext);
   const { cartItems } = useCart();
+
   console.log("Navbar cartItems:", cartItems);
 
   const handleSearch = (e) => {
@@ -22,6 +23,18 @@ export default function Navbar() {
     logout();
     navigate("/");
   };
+
+  useEffect(() => {
+    const handleMessage = (event) => {
+      if (event.data === "login-success") {
+        login(); // Päivittää AuthContextin
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [login]);
+
 
   return (
     <nav className="bg-blue-600 text-white p-4 shadow-md sticky top-0 z-50">

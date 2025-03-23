@@ -24,8 +24,14 @@ const { login } = useContext(AuthContext);
       // Backendin vastaksesta riippuen
       if (response.data.success) {
         login();
-        // Kirjautuminen onnistui, siirrytään etusivulle
-        navigate("/");  
+        if (window.opener) {
+          // Popup-ikkuna → ilmoita ja sulje
+          window.opener.postMessage("login-success", "*");
+          window.close();
+        } else {
+          // Normaali näkymä → siirrytään etusivulle
+          navigate("/");
+        }  
       } else {
         // Jos success != true, näytetään virhe
         setError(response.data.error || "Kirjautuminen epäonnistui.");

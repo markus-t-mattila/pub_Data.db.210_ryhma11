@@ -1,9 +1,12 @@
 import { useCart } from "../context/cartContext";
 import { Link } from "react-router-dom";
 import { cancelReservation } from "../services/api";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 
 export default function ShoppingCart() {
   const { cartItems, shippingCost, removeFromCart, clearCart } = useCart();
+  const { isLoggedIn } = useContext(AuthContext);
 
   // Poista yksittäinen kirja + peruu varauksen
   const handleRemoveItem = async (bookId) => {
@@ -114,6 +117,31 @@ export default function ShoppingCart() {
             >
               Tyhjennä ostoskori
             </button>
+            <div className="mt-4">
+              {isLoggedIn ? (
+                <button
+                  onClick={() => alert("Vahvistusnappi toimii, mutta ei vielä tee mitään.")}
+                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                >
+                  ✅ Vahvista ja tilaa
+                </button>
+              ) : (
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => window.open("/popup/login", "_blank", "width=600,height=600")}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  >
+                    Kirjaudu ja tilaa
+                  </button>
+                  <button
+                    onClick={() => window.open("/popup/register", "_blank", "width=600,height=600")}
+                    className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                  >
+                    Rekisteröidy ja tilaa
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </>
       )}
