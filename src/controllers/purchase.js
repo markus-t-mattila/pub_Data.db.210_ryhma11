@@ -314,6 +314,7 @@ export const releaseExpiredReservations = async () => {
         purchase_id: purchaseId,
         shipment_count: shipmentMap.length
       });
+      
   
     } catch (error) {
       await client.query("ROLLBACK");
