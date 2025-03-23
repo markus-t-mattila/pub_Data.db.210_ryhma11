@@ -136,3 +136,8 @@ export const calculateShippingCost = async (weights) => {
     const response = await api.post("/purchase/extend-reservation", data);
     return response.data;
   };
+
+  export const sendPurchaseOrder = async (data) => {
+    const response = await api.post("/purchase/order", data);
+    return response.data;
+  };

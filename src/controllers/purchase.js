@@ -227,3 +227,100 @@ export const releaseExpiredReservations = async () => {
       client.release();
     }
   };
+
+  export const createPurchaseOrder = async (req, res) => {
+    const { customer, books, shipping } = req.body;
+  
+    if (!customer || !Array.isArray(books) || books.length === 0 || !shipping?.batches) {
+      return res.status(400).json({ error: "Puuttuvia tietoja tilauksesta." });
+    }
+  
+    const userId = req.session?.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: "Käyttäjä ei ole kirjautunut." });
+    }
+    const client = await pool.connect();
+  
+    try {
+      await client.query("BEGIN");
+  
+      // Luodaan uusi purchase-rivi
+      const result = await client.query(`
+        INSERT INTO purchase (id, date, total_price, shipping_price, customer_id, created_at, modified_at)
+        VALUES (uuid_generate_v4(), NOW(), $1, $2, $3, NOW(), NOW())
+        RETURNING id
+      `, [
+        books.reduce((sum, b) => sum + parseFloat(b.price), 0),
+        shipping.totalCost,
+        userId
+      ]);
+  
+      const purchaseId = result.rows[0].id;
+  
+      // Luodaan shipment-rivit jokaiselle batchille
+      const shipmentMap = [];
+  
+      for (const batch of shipping.batches) {
+        const shipmentResult = await client.query(`
+          INSERT INTO shipment (id, purchase_id, shipping_id, created_at, modified_at)
+          VALUES (uuid_generate_v4(), $1, $2, NOW(), NOW())
+          RETURNING id
+        `, [purchaseId, batch.packageMaxWeight]);
+  
+        shipmentMap.push({
+          shipment_id: shipmentResult.rows[0].id,
+          items: [...batch.items] // painolista
+        });
+      }
+  
+      // Kohdistetaan jokainen kirja oikeaan shipmentiin painon mukaan
+      for (const book of books) {
+        const bookWeight = Number(book.weight);
+  
+        // Etsi shipment jossa tämä paino on vielä käyttämättä
+        let matchedShipment = null;
+  
+        for (const shipment of shipmentMap) {
+          const matchIndex = shipment.items.findIndex(w => Number(w) === bookWeight);
+          if (matchIndex !== -1) {
+            matchedShipment = shipment;
+            shipment.items.splice(matchIndex, 1); // käytetty
+            break;
+          }
+        }
+  
+        if (!matchedShipment) {
+          throw new Error(`Kirjaa ${book.book_id} ei voitu kohdistaa mihinkään shipmentiin.`);
+        }
+  
+        // Päivitetäa book: status = 'SOLD', purchase_id = tämä
+        await client.query(`
+          UPDATE book
+          SET status = 'SOLD', purchase_id = $1, modified_at = NOW()
+          WHERE id = $2
+        `, [purchaseId, book.book_id]);
+  
+        // Lisätää shipment_item -rivi
+        await client.query(`
+          INSERT INTO shipment_item (shipment_id, book_id)
+          VALUES ($1, $2)
+        `, [matchedShipment.shipment_id, book.book_id]);
+      }
+  
+      await client.query("COMMIT");
+  
+      return res.status(201).json({
+        message: "Tilaus tallennettu onnistuneesti.",
+        purchase_id: purchaseId,
+        shipment_count: shipmentMap.length
+      });
+  
+    } catch (error) {
+      await client.query("ROLLBACK");
+      console.error("Virhe tilauksen tallennuksessa:", error.message);
+      return res.status(500).json({ error: "Palvelinvirhe: " + error.message });
+    } finally {
+      client.release();
+    }
+  };
+  

@@ -1,12 +1,15 @@
 import { useCart } from "../context/cartContext";
-import { Link } from "react-router-dom";
+import { getMyInfo, sendPurchaseOrder } from "../services/api";
+import { Link, useNavigate } from "react-router-dom";
 import { cancelReservation } from "../services/api";
-import { useContext } from "react";
+import { useContext, useCallback } from "react";
 import { AuthContext } from "../context/AuthContext";
+import Swal from 'sweetalert2';
 
 export default function ShoppingCart() {
   const { cartItems, shippingCost, removeFromCart, clearCart } = useCart();
-  const { isLoggedIn } = useContext(AuthContext);
+  const { isLoggedIn, login } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   // Poista yksittäinen kirja + peruu varauksen
   const handleRemoveItem = async (bookId) => {
@@ -29,6 +32,63 @@ export default function ShoppingCart() {
       alert("Virhe tyhjentäessä ostoskoria: " + err);
     }
   };
+
+  const handleOrderConfirm = useCallback(async () => {
+    try {
+      if (!isLoggedIn) {
+        console.warn("Käyttäjä ei ole kirjautunut. Avataan popup...");
+        window.open("/popup/login", "_blank", "width=600,height=600");
+        return;
+      }
+      let userInfo;
+
+      try {
+        // Haetaan käyttäjän tiedot
+        userInfo = await getMyInfo();
+      } catch (err) {
+        // Tarkistetaan: jos 401 -> käyttäjä ei oikeasti ole kirjautunut backendin mielestä
+        if (err.response?.status === 401) {
+          console.warn("Käyttäjä ei ole kirjautunut (backend). Päivitetään context ja avataan popup...");
+          login(false); // tai logout() jos sinulla on sellainen
+          window.open("/popup/login", "_blank", "width=600,height=600");
+          return;
+        } else {
+          throw err; // muu virhe
+        }
+      }
+  
+      const payload = {
+        customer: userInfo,
+        books: cartItems.map((item) => ({
+          book_id: item.book_id,
+          title_name: item.title_name,
+          price: parseFloat(item.sale_price),
+          weight: item.weight
+        })),
+        shipping: {
+          totalCost: shippingCost.totalCost,
+          batches: shippingCost.batches
+        }
+      };
+  
+      console.log("Tilauksen payload:", payload);
+      const order = await sendPurchaseOrder(payload);
+      console.log("Tilauksen vastaus:", order);
+      Swal.fire({
+        icon: 'success',
+        title: 'Tilaus vahvistettu!',
+        text: 'Posti kulkee ja kusti polkee, nautinnollisia luku hetkiä!',
+        confirmButtonText: 'OK'
+      }).then(() => {
+        clearCart();
+        navigate("/profile");
+      });
+  
+    } catch (err) {
+      console.error("Virhe tilauksen vahvistuksessa:", err);
+    }
+  }, [cartItems, shippingCost]);
+  
 
   const totalShippingCost =  shippingCost?.totalCost || 0;
   console.log("totalShippingCost:", totalShippingCost);
@@ -120,10 +180,10 @@ export default function ShoppingCart() {
             <div className="mt-4">
               {isLoggedIn ? (
                 <button
-                  onClick={() => alert("Vahvistusnappi toimii, mutta ei vielä tee mitään.")}
+                  onClick={handleOrderConfirm}
                   className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
                 >
-                  ✅ Vahvista ja tilaa
+                  ✅ Vahvista tilaus
                 </button>
               ) : (
                 <div className="flex gap-4">

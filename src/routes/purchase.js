@@ -1,5 +1,5 @@
 import express from 'express';
-import { reserveBook, cancelReservation, extendReservationTime } from '../controllers/purchase.js';
+import { reserveBook, cancelReservation, extendReservationTime, createPurchaseOrder } from '../controllers/purchase.js';
 
 const router = express.Router();
 
@@ -9,6 +9,8 @@ router.post('/reserve', reserveBook);
 router.post('/release', cancelReservation);
 
 router.post('/extend-reservation', extendReservationTime);
+
+router.post('/order', createPurchaseOrder);
 
 
 export default router;
