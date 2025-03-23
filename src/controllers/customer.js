@@ -181,7 +181,7 @@ export const loginCustomer = async (req, res) => {
   
       // Haetaan kantatiedot
       const query = `
-        SELECT name, email, phone, street_address, postcode, city 
+        SELECT id, name, email, phone, street_address, postcode, city 
         FROM customer 
         WHERE id = $1
       `;

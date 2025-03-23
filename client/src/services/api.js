@@ -141,3 +141,8 @@ export const calculateShippingCost = async (weights) => {
     const response = await api.post("/purchase/order", data);
     return response.data;
   };
+
+  export const getMyOrders = async (params = {}) => {
+    const response = await api.get("/orders", { params });
+    return response.data;
+  };

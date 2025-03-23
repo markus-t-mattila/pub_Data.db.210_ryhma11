@@ -62,7 +62,8 @@ export const getOrders = async (req, res) => {
           t.name AS title_name,
           t.publisher,
           t.isbn,
-          t.year
+          t.year,
+          t.weight
         FROM purchase p
         JOIN customer c ON p.customer_id = c.id
         JOIN book b ON b.purchase_id = p.id
@@ -131,7 +132,8 @@ export const getOrders = async (req, res) => {
             name: row.title_name,
             publisher: row.publisher,
             isbn: row.isbn,
-            year: row.year
+            year: row.year,
+            weight: row.weight
           }
         });
       }
