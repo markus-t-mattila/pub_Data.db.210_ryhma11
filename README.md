@@ -4,6 +4,17 @@
 
 ========================================================================
 
+### MMa 2025-03-23
+
+* Tilaus toiminto alkaa olemaan valmis ja asiakas voi toteuttaa tilauksen alkaen rekisteröinnistä ja päättyen tilauksen vahvistukseen
+* Bakkiin lisätty tilauksen vaatimat toimenpiteet -> tuntuu toimiva
+* Frontissa omalta sivulta pääsee katsomaan omia tilauksia
+* Tilauksille kysely endpoint
+* Lisätty fronttiin ostoskorille laskuri joka nollaa varaukset, mikäli käyttäjä ei etene tilaukseen tai jatka varausta -> ajetaan myös bakkarilla ajastetusti 5 min välein
+
+Nyt vaan kovaa ajoa ja kirjojen lisäilyä
+
+
 ### MMa 2025-03-22
 
 * bakkiin lisäilty toimintoja suurin ominaisuus postikulujen laskenta ja optimointi
