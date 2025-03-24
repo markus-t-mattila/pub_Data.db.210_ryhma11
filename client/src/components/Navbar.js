@@ -7,13 +7,17 @@ import SearchBar from "../pages/SeachBar";
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const { isLoggedIn, logout, login } = useContext(AuthContext);
+  const { isLoggedIn, logout, login, setForceLogin } = useContext(AuthContext);
   const { cartItems } = useCart();
 
   console.log("Navbar cartItems:", cartItems);
   const handleLogout = () => {
-    logout();
     navigate("/");
+    setTimeout(() => {
+      setForceLogin(false);
+      logout();
+    },200);
+    
   };
 
   useEffect(() => {

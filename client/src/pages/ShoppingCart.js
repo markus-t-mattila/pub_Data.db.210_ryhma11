@@ -1,15 +1,25 @@
 import { useCart } from "../context/cartContext";
-import { getMyInfo, sendPurchaseOrder } from "../services/api";
+import { sendPurchaseOrder } from "../services/api";
 import { Link, useNavigate } from "react-router-dom";
 import { cancelReservation } from "../services/api";
-import { useContext, useCallback } from "react";
+import { useContext, useCallback, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import Swal from 'sweetalert2';
+import RegisterModal from "../components/RegisterModal";
 
 export default function ShoppingCart() {
   const { cartItems, shippingCost, removeFromCart, clearCart } = useCart();
-  const { isLoggedIn, login } = useContext(AuthContext);
+  const { isLoggedIn, login, logout, setForceLogin, forceLogin, userInfo } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [showRegister, setShowRegister] = useState(false);
+
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      //console.log("Käyttäjä kirjautui sisään, voit nyt tehdä tilauksen");
+      setForceLogin(false); // sulkee modaalin jos kirjautuminen onnistui
+    }
+  }, [isLoggedIn, forceLogin]);
 
   // Poista yksittäinen kirja + peruu varauksen
   const handleRemoveItem = async (bookId) => {
@@ -34,28 +44,15 @@ export default function ShoppingCart() {
   };
 
   const handleOrderConfirm = useCallback(async () => {
+    //console.log("userInfo:", userInfo);
+    //console.log("user isLoggedin:", isLoggedIn);
     try {
       if (!isLoggedIn) {
         console.warn("Käyttäjä ei ole kirjautunut. Avataan popup...");
-        window.open("/popup/login", "_blank", "width=600,height=600");
+        setForceLogin(true);
         return;
       }
-      let userInfo;
 
-      try {
-        // Haetaan käyttäjän tiedot
-        userInfo = await getMyInfo();
-      } catch (err) {
-        // Tarkistetaan: jos 401 -> käyttäjä ei oikeasti ole kirjautunut backendin mielestä
-        if (err.response?.status === 401) {
-          console.warn("Käyttäjä ei ole kirjautunut (backend). Päivitetään context ja avataan popup...");
-          login(false); // tai logout() jos sinulla on sellainen
-          window.open("/popup/login", "_blank", "width=600,height=600");
-          return;
-        } else {
-          throw err; // muu virhe
-        }
-      }
   
       const payload = {
         customer: userInfo,
@@ -71,9 +68,9 @@ export default function ShoppingCart() {
         }
       };
   
-      console.log("Tilauksen payload:", payload);
+      //console.log("Tilauksen payload:", payload);
       const order = await sendPurchaseOrder(payload);
-      console.log("Tilauksen vastaus:", order);
+      //console.log("Tilauksen vastaus:", order);
       Swal.fire({
         icon: 'success',
         title: 'Tilaus vahvistettu!',
@@ -87,11 +84,11 @@ export default function ShoppingCart() {
     } catch (err) {
       console.error("Virhe tilauksen vahvistuksessa:", err);
     }
-  }, [cartItems, shippingCost]);
+  }, [cartItems, shippingCost, isLoggedIn, userInfo]);
   
 
-  const totalShippingCost =  shippingCost?.totalCost || 0;
-  console.log("totalShippingCost:", totalShippingCost);
+  //const totalShippingCost =  shippingCost?.totalCost || 0;
+  //console.log("totalShippingCost:", totalShippingCost);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -188,13 +185,13 @@ export default function ShoppingCart() {
               ) : (
                 <div className="flex gap-4">
                   <button
-                    onClick={() => window.open("/popup/login", "_blank", "width=600,height=600")}
+                    onClick={() => setForceLogin(true)}
                     className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
                   >
                     Kirjaudu ja tilaa
                   </button>
                   <button
-                    onClick={() => window.open("/popup/register", "_blank", "width=600,height=600")}
+                    onClick={() => setShowRegister(true)}
                     className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
                   >
                     Rekisteröidy ja tilaa
@@ -204,6 +201,15 @@ export default function ShoppingCart() {
             </div>
           </div>
         </>
+      )}
+      {showRegister && (
+        <RegisterModal
+          onClose={() => setShowRegister(false)}
+          onSuccess={() => {
+            setShowRegister(false);
+            setForceLogin(true);
+          }}
+        />
       )}
     </div>
   );

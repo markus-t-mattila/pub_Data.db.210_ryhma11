@@ -43,7 +43,7 @@ export default function Books() {
       booksData = await availableBooks();
     }
 
-    console.log("Books received from API:", booksData);
+    //console.log("Books received from API:", booksData);
 
     const data = booksData.data && Array.isArray(booksData.data) ? booksData.data : booksData;
 
