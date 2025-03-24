@@ -1,54 +1,33 @@
 import React, { useState, useEffect, useContext } from "react";
 import { getMyInfo, getMyOrders } from "../services/api";
 import { AuthContext } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+
+
 
 export default function Profile() {
-  const [userInfo, setUserInfo] = useState(null);
   const [orders, setOrders] = useState([]);
   const [error, setError] = useState("");
-  const { isLoggedIn, login } = useContext(AuthContext);
-  const navigate = useNavigate();
+  const { isLoggedIn, login, setForceLogin, userInfo } = useContext(AuthContext);
+
 
   useEffect(() => {
     if (!isLoggedIn) {
-      navigate("/login");
+      setForceLogin(true);
       return;
     }
-    fetchUserData();
-    fetchUserOrders();
-  }, [isLoggedIn, navigate]);
+    fetchUserOrders(userInfo.data.id);
+  }, [isLoggedIn]);
+
+
 
   const fetchUserData = async () => {
     if (!isLoggedIn) {
       console.warn("Käyttäjä ei ole kirjautunut. Avataan popup...");
-      window.open("/popup/login", "_blank", "width=600,height=600");
+      setForceLogin(true);
       return;
     }
-    
-    let info
-    try {
-      // Haetaan käyttäjän tiedot
-      info = await getMyInfo();
-      //console.log("userInfo", info.data);
-      setUserInfo(info.data);
-
-    } catch (err) {
-      // Tarkistetaan: jos 401 -> käyttäjä ei oikeasti ole kirjautunut backendin mielestä
-      if (err.response?.status === 401) {
-        console.warn("Käyttäjä ei ole kirjautunut (backend). Päivitetään context ja avataan popup...");
-        login(false); // tai logout() jos sinulla on sellainen
-        window.open("/popup/login", "_blank", "width=600,height=600");
-        return;
-      } else {
-        throw err; // muu virhe
-      }
-    }
-    if (isLoggedIn) {
-      info = await getMyInfo();
-      setUserInfo(info.data);
-      fetchUserOrders(info.data.id);
-    }
+    //console.log("userInfo tässä:", id);
+    fetchUserOrders(userInfo.data.id);
   };
   
   const fetchUserOrders = async (customerId) => {
@@ -69,10 +48,10 @@ export default function Profile() {
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-4">Oma sivu</h2>
       <div className="mb-6">
-        <p><strong>Nimi:</strong> {userInfo.name}</p>
-        <p><strong>Sähköposti:</strong> {userInfo.email}</p>
-        <p><strong>Puhelin:</strong> {userInfo.phone}</p>
-        <p><strong>Osoite:</strong> {userInfo.street_address}, {userInfo.postcode} {userInfo.city}</p>
+        <p><strong>Nimi:</strong> {userInfo.data.name}</p>
+        <p><strong>Sähköposti:</strong> {userInfo.data.email}</p>
+        <p><strong>Puhelin:</strong> {userInfo.data.phone}</p>
+        <p><strong>Osoite:</strong> {userInfo.data.street_address}, {userInfo.data.postcode} {userInfo.data.city}</p>
       </div>
 
       <h3 className="text-xl font-semibold mb-2">Tilaukset</h3>
