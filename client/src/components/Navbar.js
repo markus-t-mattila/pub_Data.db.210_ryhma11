@@ -1,24 +1,16 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useState, useContext, useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useCart } from "../context/cartContext";
 import { ShoppingCartIcon } from "@heroicons/react/24/outline";
+import SearchBar from "../pages/SeachBar";
 
 export default function Navbar() {
-  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const { isLoggedIn, logout, login } = useContext(AuthContext);
   const { cartItems } = useCart();
 
-  //console.log("Navbar cartItems:", cartItems);
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim() !== "") {
-      navigate(`/search?q=${searchQuery}`);
-    }
-  };
-
+  console.log("Navbar cartItems:", cartItems);
   const handleLogout = () => {
     logout();
     navigate("/");
@@ -93,21 +85,7 @@ export default function Navbar() {
         </div>
 
         {/* Oikealla: Hakukenttä */}
-        <form onSubmit={handleSearch} className="flex justify-center md:justify-end">
-          <input
-            type="text"
-            placeholder="Etsi kirjoja..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-l-md text-black text-sm md:text-base"
-          />
-          <button
-            type="submit"
-            className="px-4 py-2 bg-green-500 text-white rounded-r-md hover:bg-green-700 transition"
-          >
-            Hae
-          </button>
-        </form>
+        <SearchBar />
       </div>
     </nav>
   );

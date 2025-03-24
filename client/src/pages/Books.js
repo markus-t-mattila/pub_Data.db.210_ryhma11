@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { availableBooks, reserveBook } from "../services/api"; 
+import { useState, useEffect, useCallback } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { availableBooks, reserveBook, searchBooks } from "../services/api"; 
 import Swal from 'sweetalert2'; // siistimpi popup-ikkuna
 import { useCart } from '../context/cartContext';
+import SearchBar from "./SeachBar";
 
 export default function Books() {
   const [books, setBooks] = useState([]);
@@ -27,11 +28,21 @@ export default function Books() {
     fetchBooks();
   }, [cartItems]);
 
-  const fetchBooks = async () => {
+  const [searchParams] = useSearchParams();
+  const query = searchParams.get("q");
+
+  const fetchBooks = useCallback(async () => {
     setLoading(true);
     console.log("Fetching all books...");
 
-    const booksData = await availableBooks();
+
+    let booksData = [];
+    if (query) {
+      booksData = await searchBooks(query);
+    } else {
+      booksData = await availableBooks();
+    }
+
     console.log("Books received from API:", booksData);
 
     const data = booksData.data && Array.isArray(booksData.data) ? booksData.data : booksData;
@@ -46,7 +57,11 @@ export default function Books() {
     }
 
     setLoading(false);
-  };
+  }, [query]);
+
+  useEffect(() => {
+    fetchBooks();
+  }, [fetchBooks, query]);
 
   const groupBooksByTitle = (books) => {
     const grouped = {};
@@ -138,7 +153,7 @@ export default function Books() {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Kaikki kirjat</h1>
-
+      <SearchBar />
       {loading ? (
         <p className="text-lg text-blue-600 font-semibold">🔄 Ladataan tietoja...</p>
       ) : (

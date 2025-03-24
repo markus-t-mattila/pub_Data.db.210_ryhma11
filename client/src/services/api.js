@@ -132,17 +132,27 @@ export const calculateShippingCost = async (weights) => {
     }
   };
 
-  export const extendReservation = async (data) => {
-    const response = await api.post("/purchase/extend-reservation", data);
-    return response.data;
-  };
+export const extendReservation = async (data) => {
+  const response = await api.post("/purchase/extend-reservation", data);
+  return response.data;
+};
 
-  export const sendPurchaseOrder = async (data) => {
-    const response = await api.post("/purchase/order", data);
-    return response.data;
-  };
+export const sendPurchaseOrder = async (data) => {
+  const response = await api.post("/purchase/order", data);
+  return response.data;
+};
 
-  export const getMyOrders = async (params = {}) => {
-    const response = await api.get("/orders", { params });
-    return response.data;
-  };
+export const getMyOrders = async (params = {}) => {
+  const response = await api.get("/orders", { params });
+  return response.data;
+};
+
+export const addBookWithTitle = async (book) => {
+    try {
+      const response = await api.post(`/books`, book);
+      return response;
+    } catch (error) {
+      console.error("Virhe kirjan lisäämisessä:", error);
+      throw error;
+    }
+}

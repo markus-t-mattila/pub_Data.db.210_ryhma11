@@ -17,6 +17,7 @@ import { AdminAuthProvider } from "./context/AdminAuthContext";
 import { CartProvider } from './context/cartContext';
 import ShoppingCart from "./pages/ShoppingCart";
 import SingleBook from "./pages/SingleBook";
+import BookForm from "./pages/BooksForm";
 
 export default function App() {
 
@@ -37,7 +38,8 @@ export default function App() {
           <Route index element={<Landing />} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
-          <Route path="search" element={<SearchResults />} />
+          {/* Search handled by /books route */}
+          {/* <Route path="search" element={<SearchResults />} /> */}
           <Route path="classes" element={<Classes />} />
           <Route path="customers-stats" element={<CustomersStats />} />
           <Route path="profile" element={<Profile />} />
@@ -74,6 +76,7 @@ export default function App() {
         >
           <Route path="login" element={<AdminLogin />} />
           <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="add-book" element={<BookForm />} />
         </Route>
       </Routes>
     </Router>
