@@ -20,15 +20,15 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (isLoggedIn) {
-      console.log("Käyttäjä kirjautui sisään");
+      //console.log("Käyttäjä kirjautui sisään");
       //console.log("isLoggedIn", isLoggedIn);
     }
   }, [isLoggedIn]);
 
   useEffect(() => {
     if (!forceLogin) {
-      console.log("Käyttäjä kirjautui ulos");
-      console.log("forcelogin", forceLogin);
+      //console.log("Käyttäjä kirjautui ulos");
+      //console.log("forcelogin", forceLogin);
     }
   }, [forceLogin]);
 
@@ -43,7 +43,7 @@ export function AuthProvider({ children }) {
       localStorage.setItem("loggedIn", "true");
       //setIsLoggedIn(true);
       //console.log("sisäänkirjautuminen onnistui");
-      console.log("info", info);
+      //console.log("info", info);
       //console.log("isLoggedIn", isLoggedIn);
     } catch (error) {
       console.error("Kirjautumistiedon hakeminen epäonnistui", error);

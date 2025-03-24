@@ -22,9 +22,10 @@ export default function Navbar() {
   const handleLogout = () => {
     navigate("/");
     setTimeout(() => {
-      logout();
       setForceLogin(false);
-    },100);
+      logout();
+    },200);
+    
   };
 
   useEffect(() => {

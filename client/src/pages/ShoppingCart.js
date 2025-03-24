@@ -44,8 +44,8 @@ export default function ShoppingCart() {
   };
 
   const handleOrderConfirm = useCallback(async () => {
-    console.log("userInfo:", userInfo);
-    console.log("user isLoggedin:", isLoggedIn);
+    //console.log("userInfo:", userInfo);
+    //console.log("user isLoggedin:", isLoggedIn);
     try {
       if (!isLoggedIn) {
         console.warn("Käyttäjä ei ole kirjautunut. Avataan popup...");
@@ -68,9 +68,9 @@ export default function ShoppingCart() {
         }
       };
   
-      console.log("Tilauksen payload:", payload);
+      //console.log("Tilauksen payload:", payload);
       const order = await sendPurchaseOrder(payload);
-      console.log("Tilauksen vastaus:", order);
+      //console.log("Tilauksen vastaus:", order);
       Swal.fire({
         icon: 'success',
         title: 'Tilaus vahvistettu!',
