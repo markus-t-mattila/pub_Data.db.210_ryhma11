@@ -59,7 +59,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("loggedIn");
     setUserInfo(null);
     setForceLogin(false);
-    console.log("Kirjauduttu ulos");
+    //console.log("Kirjauduttu ulos");
   };
 
   return (

@@ -7,7 +7,7 @@ import { ShoppingCartIcon } from "@heroicons/react/24/outline";
 export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
-  const { isLoggedIn, logout, login } = useContext(AuthContext);
+  const { isLoggedIn, logout, login, setForceLogin } = useContext(AuthContext);
   const { cartItems } = useCart();
 
   //console.log("Navbar cartItems:", cartItems);
@@ -20,8 +20,11 @@ export default function Navbar() {
   };
 
   const handleLogout = () => {
-    logout();
     navigate("/");
+    setTimeout(() => {
+      logout();
+      setForceLogin(false);
+    },100);
   };
 
   useEffect(() => {

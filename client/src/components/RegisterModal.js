@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { registerCustomer } from "../services/api";
+import { XMarkIcon } from "@heroicons/react/24/solid";
 
 export default function RegisterModal({ onClose, onSuccess }) {
   const [name, setName] = useState("");
@@ -47,9 +48,9 @@ export default function RegisterModal({ onClose, onSuccess }) {
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md relative">
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 text-gray-600 hover:text-black text-xl font-bold"
+          className="absolute top-2 right-2 text-red-600 hover:text-red-800 text-xl font-bold"
         >
-          ×
+          <XMarkIcon className="h-7 w-7 font-bold" />
         </button>
         <h2 className="text-2xl font-bold mb-4 text-center">Rekisteröidy</h2>
         {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
