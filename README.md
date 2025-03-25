@@ -4,6 +4,15 @@
 
 ========================================================================
 
+### MMa 2025-03-25
+
+#### Admin puolen muutoksia
+* auth yhteydessa saadaan käyttäjän store_id -> tämän perusteella dashboard sivun sisältö
+* voidaan hyödyntää tulevaisuudessa useiden skeemojen kanssa
+* bookform päivitetty -> sujuvanpi täyttö dropdowneilla ja datalisteilla
+* deployaan viela tänään https://tie-tkannat.it.tuni.fi/~ksmama/ tämän version
+
+
 ### MMa 2025-03-23
 
 * Tilaus toiminto alkaa olemaan valmis ja asiakas voi toteuttaa tilauksen alkaen rekisteröinnistä ja päättyen tilauksen vahvistukseen
