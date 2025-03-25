@@ -13,6 +13,7 @@ import purchase from './routes/purchase.js'; // Lisätty ostosreitit
 import './controllers/utils.js';
 import shippingRoutes from './routes/shipping.js';
 import orderRoutes from './routes/orders.js'; // Lisätty tilausreitit
+import {getEnums} from './controllers/utils.js';
 
 
 // Lataa ympäristömuuttujat (varmista, että polku on oikein)
@@ -79,6 +80,8 @@ app.use('/purchase', purchase);
 app.use('/shipping', shippingRoutes);
 
 app.use('/orders', orderRoutes);
+
+app.get('/enums', getEnums);
 
 // Testireitti, jolla frontend voi varmistaa, että backend toimii
 app.get("/", (req, res) => {

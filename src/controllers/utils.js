@@ -63,3 +63,21 @@ export const minimizeShipping = async (weights) =>{
     return dp(0);
   }
   
+  export const getEnums = async (req, res) => {
+    try {
+      const [classResult, typeResult, conditionResult] = await Promise.all([
+        pool.query("SELECT name FROM book_class"),
+        pool.query("SELECT name FROM book_type"),
+        pool.query("SELECT unnest(enum_range(NULL::condition_enum)) AS value"),
+      ]);
+  
+      res.json({
+        class: classResult.rows.map((r) => r.name),
+        type: typeResult.rows.map((r) => r.name),
+        condition: conditionResult.rows.map((r) => r.value),
+      });
+    } catch (error) {
+      console.error("Virhe haettaessa enum-arvoja:", error);
+      res.status(500).json({ error: "Tietotyyppien haku epäonnistui" });
+    }
+  };

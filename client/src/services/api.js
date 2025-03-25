@@ -169,3 +169,7 @@ export const searchAllStores = async () => {
   const response = await api.get("/stores");
   return response.data;
 };
+
+export const bookEnums = async () => {
+  return api.get("/enums");
+};

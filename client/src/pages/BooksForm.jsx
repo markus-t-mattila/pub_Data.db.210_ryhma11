@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAdminAuth } from "../context/AdminAuthContext";
-import { addBookWithTitle, searchStoresByIds, searchAllStores } from "../services/api";
+import { addBookWithTitle, searchStoresByIds, searchAllStores, bookEnums } from "../services/api";
 
 const BookForm = () => {
   const { admin } = useAdminAuth();
   const [stores, setStores] = useState([]);
+  const [typeOptions, setTypeOptions] = useState([]);
+  const [classOptions, setClassOptions] = useState([]);
+  const [conditionOptions, setConditionOptions] = useState([]);
 
   const [isbn, setIsbn] = useState("");
   const [name, setName] = useState("");
@@ -24,20 +27,26 @@ const BookForm = () => {
 
   const navigate = useNavigate();
 
-  
+
   useEffect(() => {
-    const fetchStores = async () => {
+    const fetchStoresAndEnums = async () => {
       if (!admin) return;
       try {
-        const result = admin.is_central
+        const storeData = admin.is_central
           ? await searchAllStores()
           : await searchStoresByIds(admin.stores || []);
-        setStores(result);
+        setStores(storeData);
+  
+        const enums = await bookEnums();
+        //console.log(enums.data);
+        setTypeOptions(enums.data.type || []);
+        setClassOptions(enums.data.class || []);
+        setConditionOptions(enums.data.condition || []);
       } catch (error) {
-        console.error("Kauppojen haku epäonnistui:", error);
+        console.error("Virhe hakiessa tietoja:", error);
       }
     };
-    fetchStores();
+    fetchStoresAndEnums();
   }, [admin]);
 
   const handleSubmit = async (e) => {
@@ -143,21 +152,30 @@ const BookForm = () => {
             required
           />
           <label className="block mb-2">Type</label>
-          <input
-            type="text"
+          <select
             className="w-full p-2 border rounded mb-4"
             value={typeName}
             onChange={(e) => setTypeName(e.target.value)}
             required
-          />
+          >
+            <option value="" disabled>Valitse tyyppi</option>
+            {typeOptions.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+
           <label className="block mb-2">Class</label>
-          <input
-            type="text"
+          <select
             className="w-full p-2 border rounded mb-4"
             value={className}
             onChange={(e) => setClassName(e.target.value)}
             required
-          />
+          >
+            <option value="" disabled>Valitse luokka</option>
+            {classOptions.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
           <label className="block mb-2">Store</label>
           <select
             className="w-full p-2 border rounded mb-4"
@@ -173,13 +191,17 @@ const BookForm = () => {
             ))}
           </select>
           <label className="block mb-2">Condition</label>
-          <input
-            type="text"
+          <select
             className="w-full p-2 border rounded mb-4"
             value={condition}
             onChange={(e) => setCondition(e.target.value)}
             required
-          />
+          >
+            <option value="" disabled>Valitse kunto</option>
+            {conditionOptions.map((cond) => (
+              <option key={cond} value={cond}>{cond}</option>
+            ))}
+          </select>
           <label className="block mb-2">Purchase Price</label>
           <input
             type="number"
