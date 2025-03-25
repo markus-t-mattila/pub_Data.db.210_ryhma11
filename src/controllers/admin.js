@@ -42,7 +42,7 @@ export const registerAdmin = async (req, res) => {
           (email, passwrd, is_central)
         VALUES
           ($1, $2, $3)
-        RETURNING *;
+        RETURNING email, is_central;
       `;
       const adminValues = [email, hashedPassword,is_central ?? false];
       const result = await client.query(insertAdminQuery, adminValues);
@@ -105,12 +105,24 @@ export const loginAdmin = async (req, res) => {
       if (!isPasswordValid) {
         return res.status(401).json({ error: "Väärä sähköposti tai salasana." });
       }
+
+      if (!admin.is_central) {
+        // Jos admin ei ole keskusadmin, haetaan kaupat, joihin admin on liitetty
+        const storeQuery = `
+          SELECT store_id
+          FROM admin_store
+          WHERE admin_id = $1
+        `;
+        const storeResult = await pool.query(storeQuery, [admin.id]);
+        admin.storeIds = storeResult.rows.map(row => row.store_id);
+      }
   
       // Tallennetaan adminin tiedot istuntoon
       req.session.admin = {
         id: admin.id,
         email: admin.email,
         is_central: admin.is_central,
+        stores: admin.storeIds
       };
 
       res.json({
