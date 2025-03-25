@@ -95,3 +95,18 @@ export const addTitle = async (req, res) => {
     res.status(500).json({ error: 'Failed to add title' });
   }
 };
+
+export const getDistinctTitles = async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT DISTINCT isbn, name, writer, publisher, year, weight
+      FROM title
+      ORDER BY name ASC
+    `);
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Virhe haettaessa distinct titleja:", err);
+    res.status(500).json({ error: "Titlejen haku epäonnistui" });
+  }
+};
