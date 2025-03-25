@@ -12,6 +12,16 @@
 * bookform päivitetty -> sujuvanpi täyttö dropdowneilla ja datalisteilla
 * deployaan viela tänään https://tie-tkannat.it.tuni.fi/~ksmama/ tämän version
 
+-> edit nyt deployattu admin puolelle luotu 4-adminta
+* yksittäisille liikkeille
+ * d1@example.com
+ * d2@example.com
+ * d2@example.com
+* central admin
+ * admin@example.com
+
+** kaikkien salasanat: 1234 **
+
 
 ### MMa 2025-03-23
 
