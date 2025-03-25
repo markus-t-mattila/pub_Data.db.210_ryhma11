@@ -157,3 +157,15 @@ export const addBookWithTitle = async (book) => {
       throw error;
     }
 }
+
+export const searchStoresByIds = async (ids) => {
+  const results = await Promise.all(
+    ids.map((id) => api.get("/stores", { params: { id } }))
+  );
+  return results.flatMap((r) => r.data);
+};
+
+export const searchAllStores = async () => {
+  const response = await api.get("/stores");
+  return response.data;
+};

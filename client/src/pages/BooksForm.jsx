@@ -1,8 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { addBookWithTitle } from "../services/api.js";
+import { useAdminAuth } from "../context/AdminAuthContext";
+import { addBookWithTitle, searchStoresByIds, searchAllStores } from "../services/api";
 
 const BookForm = () => {
+  const { admin } = useAdminAuth();
+  const [stores, setStores] = useState([]);
+
   const [isbn, setIsbn] = useState("");
   const [name, setName] = useState("");
   const [writer, setWriter] = useState("");
@@ -19,6 +23,22 @@ const BookForm = () => {
   const [success, setSuccess] = useState("");
 
   const navigate = useNavigate();
+
+  
+  useEffect(() => {
+    const fetchStores = async () => {
+      if (!admin) return;
+      try {
+        const result = admin.is_central
+          ? await searchAllStores()
+          : await searchStoresByIds(admin.stores || []);
+        setStores(result);
+      } catch (error) {
+        console.error("Kauppojen haku epäonnistui:", error);
+      }
+    };
+    fetchStores();
+  }, [admin]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -141,11 +161,22 @@ const BookForm = () => {
           <label className="block mb-2">Store Name</label>
           <input
             type="text"
-            className="w-full p-2 border rounded mb-4"
+            className="w-full p-2 border rounded mb-1"
             value={storeName}
             onChange={(e) => setStoreName(e.target.value)}
-            required
+            placeholder="Valitse tai kirjoita kaupan nimi"
+            list="store-options"
           />
+          <datalist id="store-options">
+            {stores
+              .filter((s) =>
+                storeName.trim() === "" ||
+                s.name.toLowerCase().includes(storeName.toLowerCase())
+              )
+              .map((store) => (
+                <option key={store.id} value={store.name} />
+              ))}
+          </datalist>
           <label className="block mb-2">Condition</label>
           <input
             type="text"
