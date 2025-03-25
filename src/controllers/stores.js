@@ -16,10 +16,21 @@ export const searchStores = async (req, res) => {
   // Käydään läpi kaikki sallitut kentät
   for (const field of allowedFields) {
     if (req.query[field]) {
-      // Lisätään ehtolause SQL:ään
-      conditions.push(`LOWER(${field}) LIKE LOWER($${i++})`);
-      // Lisätään arvoksi LIKE-haku, esim. %tampere%
-      values.push(`%${req.query[field]}%`);
+      if (field === 'id') {
+        // UUID ilman LOWERiä ja LIKEa
+        conditions.push(`${field} = $${i++}`);
+        values.push(req.query[field]);
+      }
+      else if (field === 'postcode') {
+        // Postinumero: tässä käytetään =-operaattoria ja likea
+        conditions.push(`${field} = $${i++}`);
+        values.push(`%${req.query[field]}%`);	
+      } 
+      else {
+        // Muut kentät: käytetään LIKEa ja LOWERia
+        conditions.push(`LOWER(${field}) LIKE LOWER($${i++})`);
+        values.push(`%${req.query[field]}%`);
+      }
     }
   }
 
