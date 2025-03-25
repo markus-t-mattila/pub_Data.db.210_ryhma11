@@ -9,7 +9,8 @@ const pool = new Pool({
   host: 'localhost',
   database: 'central_divari',
   password: 'password',
-  port: 5432
+  port: 5432,
+  statement_timeout: 5000 // katkaise yli 5 sekunnin kyselyt
 })
 
 export default pool;
