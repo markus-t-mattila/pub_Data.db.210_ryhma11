@@ -173,3 +173,7 @@ export const searchAllStores = async () => {
 export const bookEnums = async () => {
   return api.get("/enums");
 };
+
+export const distTitles = async () => {
+  return api.get("/title");
+};

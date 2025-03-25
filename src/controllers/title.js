@@ -99,7 +99,7 @@ export const addTitle = async (req, res) => {
 export const getDistinctTitles = async (req, res) => {
   try {
     const result = await pool.query(`
-      SELECT DISTINCT isbn, name, writer, publisher, year, weight
+      SELECT DISTINCT isbn, name, writer, publisher, year, weight, type, class
       FROM title
       ORDER BY name ASC
     `);
