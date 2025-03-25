@@ -158,25 +158,20 @@ const BookForm = () => {
             onChange={(e) => setClassName(e.target.value)}
             required
           />
-          <label className="block mb-2">Store Name</label>
-          <input
-            type="text"
-            className="w-full p-2 border rounded mb-1"
+          <label className="block mb-2">Store</label>
+          <select
+            className="w-full p-2 border rounded mb-4"
             value={storeName}
-            onChange={(e) => setStoreName(e.target.value)}
-            placeholder="Valitse tai kirjoita kaupan nimi"
-            list="store-options"
-          />
-          <datalist id="store-options">
-            {stores
-              .filter((s) =>
-                storeName.trim() === "" ||
-                s.name.toLowerCase().includes(storeName.toLowerCase())
-              )
-              .map((store) => (
-                <option key={store.id} value={store.name} />
-              ))}
-          </datalist>
+            onChange={(e) => setStoreName(e.target.value)} // storeName sisältää nyt store.id
+            required
+          >
+            <option value="" disabled>Valitse kauppa</option>
+            {stores.map((store) => (
+              <option key={store.id} value={store.id}>
+                {store.name}
+              </option>
+            ))}
+          </select>
           <label className="block mb-2">Condition</label>
           <input
             type="text"
