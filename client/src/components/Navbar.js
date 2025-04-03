@@ -49,7 +49,6 @@ export default function Navbar() {
             !isLoggedIn && { to: "/register", label: "Rekisteröidy" },
             isLoggedIn && { to: "/profile", label: "Oma sivu" },
             isLoggedIn && { onClick: handleLogout, label: "Kirjaudu ulos" },
-            { to: "/customers-stats", label: "Käyttäjätilastot" },
             { to: "/classes", label: "Teosluokat" },
             { to: "/books", label: "Kirjat" }
           ]

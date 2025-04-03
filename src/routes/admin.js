@@ -6,7 +6,6 @@ const router = express.Router();
 
 // Admin luodaan turvallisuussyistä tietokannan alustusvaiheessa
 // tai tietokantayhteyden kautta
-
 // // POST /admin/register
 // router.post('/register', registerAdmin);
 

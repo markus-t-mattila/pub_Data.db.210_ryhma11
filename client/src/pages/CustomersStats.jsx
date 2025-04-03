@@ -17,7 +17,7 @@ const CustomersStats = () => {
   
       setStatus('Ladataan raporttia...');
 
-      const response = await fetch(fileUrl);
+      const response = await fetch(fileUrl, { credentials: 'include' });
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
 
