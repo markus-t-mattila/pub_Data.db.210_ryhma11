@@ -11,13 +11,12 @@ export default function Profile() {
 
 
   useEffect(() => {
-    if (!isLoggedIn) {
+    if (!isLoggedIn || !userInfo) {
       setForceLogin(true);
       return;
     }
-    fetchUserOrders(userInfo.data.id);
+    fetchUserOrders(userInfo.id);
   }, [isLoggedIn]);
-
 
 
   const fetchUserData = async () => {
@@ -27,7 +26,7 @@ export default function Profile() {
       return;
     }
     //console.log("userInfo tässä:", id);
-    fetchUserOrders(userInfo.data.id);
+    fetchUserOrders(userInfo.id);
   };
   
   const fetchUserOrders = async (customerId) => {
@@ -48,10 +47,10 @@ export default function Profile() {
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-4">Oma sivu</h2>
       <div className="mb-6">
-        <p><strong>Nimi:</strong> {userInfo.data.name}</p>
-        <p><strong>Sähköposti:</strong> {userInfo.data.email}</p>
-        <p><strong>Puhelin:</strong> {userInfo.data.phone}</p>
-        <p><strong>Osoite:</strong> {userInfo.data.street_address}, {userInfo.data.postcode} {userInfo.data.city}</p>
+        <p><strong>Nimi:</strong> {userInfo.name}</p>
+        <p><strong>Sähköposti:</strong> {userInfo.email}</p>
+        <p><strong>Puhelin:</strong> {userInfo.phone}</p>
+        <p><strong>Osoite:</strong> {userInfo.street_address}, {userInfo.postcode} {userInfo.city}</p>
       </div>
 
       <h3 className="text-xl font-semibold mb-2">Tilaukset</h3>

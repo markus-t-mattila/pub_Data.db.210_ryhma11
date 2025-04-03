@@ -38,9 +38,10 @@ export function AuthProvider({ children }) {
   const login = async () => {
     try {
       const info = await getMyInfo();  // Hakee backendiltä kirjautuneen käyttäjän tiedot
-      setUserInfo(info);
+      setUserInfo(info.data);
       setIsLoggedIn(true);
       localStorage.setItem("loggedIn", "true");
+      console.log('info:', info);
       //setIsLoggedIn(true);
       //console.log("sisäänkirjautuminen onnistui");
       //console.log("info", info);
