@@ -1,5 +1,6 @@
 import { exec } from "child_process";
 import dotenv from "dotenv";
+import { registerAdmin } from "../controllers/admin.js";
 
 dotenv.config();
 
@@ -21,7 +22,7 @@ const INIT_DB_COMMAND = `psql -h ${PG_HOST} -U ${PG_USER} -f src/database/sql_st
 console.log("Resetoidaan tietokanta...");
 
 // Ajetaan ensin resetointi
-exec(RESET_DB_COMMAND, (error, stdout, stderr) => {
+exec(RESET_DB_COMMAND, async (error, stdout, stderr) => {
   if (stdout) {
     console.log('STDOUT:\n'+stdout);
   }
@@ -37,7 +38,7 @@ exec(RESET_DB_COMMAND, (error, stdout, stderr) => {
 
   // Ajetaan sen jälkeen alustus
   console.log("alustetaan tietokanta...");
-  exec(INIT_DB_COMMAND, (error, stdout, stderr) => {
+  exec(INIT_DB_COMMAND, async (error, stdout, stderr) => {
     if (stdout) {
       console.log('STDOUT:\n'+stdout);
     }
@@ -50,6 +51,42 @@ exec(RESET_DB_COMMAND, (error, stdout, stderr) => {
       return;
     }
     console.log("Tietokannan alustus onnistui!");
+    await createAdmins();
   });
 });
+
+const createAdmins = async () => {
+  const centralAdminRequest = {
+    body: {
+      email: "central@admin.dev",
+      password: "divariadmin",
+      is_central: true,
+    }
+  }
+  const externalAdminRequest = {
+    body: {
+      email: "external@admin.dev",
+      password: "divariadmin2",
+      is_central: false,
+      storeIds: [
+        "a1111111-1111-1111-1111-111111111111",
+        "a2222222-2222-2222-2222-222222222222",
+      ],
+    }
+  }
+  registerAdmin(centralAdminRequest, {
+    status: (code) => ({
+      json: (data) => {
+        console.log("Keskusadmin:", data);
+      }
+    })
+  });
+  registerAdmin(externalAdminRequest, {
+    status: (code) => ({
+      json: (data) => {
+        console.log("Ulkoinen admin:", data);
+      }
+    })
+  });
+}
 

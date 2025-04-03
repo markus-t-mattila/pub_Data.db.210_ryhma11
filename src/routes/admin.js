@@ -4,8 +4,11 @@ import { requireAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// POST /admin/register
-router.post('/register', registerAdmin);
+// Admin luodaan turvallisuussyistä tietokannan alustusvaiheessa
+// tai tietokantayhteyden kautta
+
+// // POST /admin/register
+// router.post('/register', registerAdmin);
 
 // Adminin kirjautuminen
 router.post("/login", loginAdmin);
