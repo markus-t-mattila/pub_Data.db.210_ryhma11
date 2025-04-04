@@ -44,6 +44,7 @@ export default function AdminNavbar() {
           </div>
         ) : (
           <div className="flex gap-4">
+            <Link to="/" className="hover:underline">Käyttäjänäkymä</Link>
             <Link to="/admin/login" className="hover:underline">Kirjaudu</Link>
           </div>
         )}

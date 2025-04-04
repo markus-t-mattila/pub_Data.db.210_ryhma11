@@ -50,7 +50,8 @@ export default function Navbar() {
             isLoggedIn && { to: "/profile", label: "Oma sivu" },
             isLoggedIn && { onClick: handleLogout, label: "Kirjaudu ulos" },
             { to: "/classes", label: "Teosluokat" },
-            { to: "/books", label: "Kirjat" }
+            { to: "/books", label: "Kirjat" },
+            { to: "/admin", label: "Ylläpitopaneeli" }
           ]
             .filter(Boolean)
             .map((item, index) =>
