@@ -8,7 +8,7 @@ export const searchBooks = async (req, res) => {
   }
   const query = `
     WITH matches AS (
-      SELECT 
+      SELECT
         t.isbn,
         t.name,
         t.writer,
@@ -39,7 +39,7 @@ export const searchBooks = async (req, res) => {
 
 export const titlesByClass = async (req, res) => {
   const query = `
-    SELECT 
+    SELECT
       t.class,
       COUNT(b.id) AS count,
       SUM(b.sale_price) AS total_price,
@@ -178,12 +178,24 @@ export const addBookWithTitleService = async (req, res) => {
     store_name,
     condition,
     purchase_price,
-    sale_price
+    sale_price,
+    add_to_single_store,
   } = req.body;
 
   // Tarkistetaan että kaikki pakolliset kentät on annettu
-  if (!name || !writer || !publisher || !weight || !type_name || !class_name || !store_name || !condition || !purchase_price || !sale_price) {
-    return res.status(400).json({ error: 'Missing required fields' });
+  if (
+    !name ||
+    !writer ||
+    !publisher ||
+    !weight ||
+    !type_name ||
+    !class_name ||
+    !store_name ||
+    !condition ||
+    !purchase_price ||
+    !sale_price
+  ) {
+    return res.status(400).json({ error: "Missing required fields" });
   }
 
   const client = await pool.connect();
@@ -217,7 +229,7 @@ export const addBookWithTitleService = async (req, res) => {
 
     // Tarkistetaan löytyykö jo kyseinen title
     const existing = await client.query(
-      `SELECT id FROM title 
+      `SELECT id FROM title
        WHERE LOWER(name) = LOWER($1) AND LOWER(writer) = LOWER($2) AND year = $3 AND LOWER(publisher) = LOWER($4)`,
       [name, writer, year, publisher]
     );
@@ -266,7 +278,7 @@ export const addBookWithTitleService = async (req, res) => {
 
     const storeId = matchingStore.id;
 
-    // Lisätään book instanssi
+    // Lisätään uusi book instanssi
     const bookId = uuidv4();
     await client.query(
       `INSERT INTO book (
@@ -285,12 +297,73 @@ export const addBookWithTitleService = async (req, res) => {
       ]
     );
 
-    await client.query('COMMIT');
+    /*** Lisätään kirja myös sen omistavan divarin tietokantaan, ***/
+    /*** jos käyttäjä on valinnut sen lisättäväksi ***/
+    if (add_to_single_store) {
+      // Haetaan divarin skeeman nimi id:n perusteella
+      const schemaRes = await client.query(
+        "SELECT schema_name FROM store_schema_mapping WHERE store_id = $1",
+        [storeId],
+      );
+      if (schemaRes.rows.length === 0) {
+        await client.query("ROLLBACK");
+        return res.status(400).json({
+          error: `No schema found for store '${store_name}'`,
+        });
+      }
+      const storeSchema = schemaRes.rows[0].schema_name;
+
+      // Tarkistetaan löytyykö title divarista
+      const existingStoreTitle = await client.query(
+        `SELECT id FROM ${storeSchema}.title
+         WHERE LOWER(name) = LOWER($1) AND LOWER(writer) = LOWER($2) AND year = $3 AND LOWER(publisher) = LOWER($4)`,
+        [name, writer, year, publisher],
+      );
+
+      // Jos ei, niin lisätään title divariin
+      if (existingStoreTitle.rows.length === 0) {
+        await client.query(
+          `INSERT INTO ${storeSchema}.title (
+            id, isbn, name, writer, publisher, year, weight, type, class, created_at, modified_at
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())`,
+          [
+            titleId,
+            isbn,
+            name,
+            writer,
+            publisher,
+            year,
+            weight,
+            typeNameNormalized,
+            classNameNormalized,
+          ],
+        );
+      }
+
+      // Lisätään book divariin
+      await client.query(
+        `INSERT INTO ${storeSchema}.book (
+          id, title_id, condition, purchase_price, sale_price, status, store_id, created_at, modified_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())`,
+        [
+          bookId,
+          titleId,
+          condition,
+          purchase_price,
+          sale_price,
+          "AVAILABLE",
+          storeId,
+        ],
+      );
+    }
+
+    await client.query("COMMIT");
 
     res.status(201).json({
       message: 'Book added successfully',
       book_id: bookId,
-      title_id: titleId
+      title_id: titleId,
+      added_to_single_store: !!add_to_single_store,
     });
 
   } catch (err) {

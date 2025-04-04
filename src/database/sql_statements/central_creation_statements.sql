@@ -3,7 +3,7 @@
 -- book type
 CREATE TABLE IF NOT EXISTS book_type (
   -- id    UUID    PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name  TEXT    UNIQUE NOT NULL 
+  name  TEXT    UNIQUE NOT NULL
 );
 
 INSERT INTO book_type (name) VALUES
@@ -49,6 +49,17 @@ CREATE TABLE IF NOT EXISTS store (
   created_at      TIMESTAMP         NOT NULL,
   modified_at     TIMESTAMP         NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS store_schema_mapping (
+  store_id      UUID    PRIMARY KEY,
+  schema_name   TEXT    UNIQUE NOT NULL,
+
+  CONSTRAINT fk_store_id
+    FOREIGN KEY (store_id)
+    REFERENCES store (id)
+    ON DELETE CASCADE
+);
+
 
 CREATE TABLE IF NOT EXISTS purchase (
   id                UUID            PRIMARY KEY DEFAULT uuid_generate_v4(),

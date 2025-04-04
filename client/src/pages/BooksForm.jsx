@@ -10,6 +10,7 @@ const BookForm = () => {
   const [classOptions, setClassOptions] = useState([]);
   const [conditionOptions, setConditionOptions] = useState([]);
   const [distinctTitles, setDistinctTitles] = useState([]);
+  const [addToSingleStore, setAddToSingleStore] = useState(false);
 
   const [isbn, setIsbn] = useState("");
   const [name, setName] = useState("");
@@ -87,21 +88,15 @@ const BookForm = () => {
         condition,
         purchase_price: purchasePrice,
         sale_price: salePrice,
+        add_to_single_store: addToSingleStore,
       });
       if (response.status === 201) {
-        setSuccess("Book added successfully");
-        setIsbn("");
-        setName("");
-        setWriter("");
-        setPublisher("");
-        setYear("");
-        setWeight("");
-        setTypeName("");
-        setClassName("");
-        setStoreName("");
-        setCondition("");
-        setPurchasePrice("");
-        setSalePrice("");
+        setSuccess(
+          response.data.added_to_single_store
+            ? "Kirja lisättyy valittuun divariin sekä keskusdivariin!"
+            : "Kirja lisätty keskusdivariin!"
+        );
+        clearForm();
       } else {
         setError(response.data.error || "Kirjan lisääminen epäonnistui.");
       }
@@ -129,7 +124,7 @@ const BookForm = () => {
     setPurchasePrice("");
     setSalePrice("");
     setError("");
-    setSuccess("");
+    setAddToSingleStore(false);
   };
 
   const uniqueTitles = Array.from(new Set(
@@ -165,14 +160,14 @@ const BookForm = () => {
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-        <h2 className="text-2xl font-bold mb-4 text-center">Add Book</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center">Lisää kirja</h2>
         {error && <p className="text-red-500 text-sm">{error}</p>}
         {success && <p className="text-green-500 text-sm">{success}</p>}
         <form onSubmit={handleSubmit}>
           <label className="block mb-2">ISBN</label>
           <input
             type="text"
-            placeholder="Syötä ISBN tai valitse"
+            placeholder="Syötä teoksen ISBN"
             className="w-full p-2 border rounded mb-4"
             list="isbn-list"
             value={isbn}
@@ -180,13 +175,14 @@ const BookForm = () => {
             required
           />
           <datalist id="isbn-list">
-            {uniqueIsbns
-              .map((t, idx) => <option key={idx} value={t} />)}
+            {uniqueIsbns.map((t, idx) => (
+              <option key={idx} value={t} />
+            ))}
           </datalist>
-          <label className="block mb-2">Title</label>
+          <label className="block mb-2">Nimi</label>
           <input
             type="text"
-            placeholder="Syötä kirjan nimi tai valitse"
+            placeholder="Syötä teoksen nimi"
             className="w-full p-2 border rounded mb-4"
             list="title-names"
             value={name}
@@ -194,14 +190,15 @@ const BookForm = () => {
             required
           />
           <datalist id="title-names">
-            {uniqueTitles
-              .map((t, idx) => <option key={idx} value={t} />)}
+            {uniqueTitles.map((t, idx) => (
+              <option key={idx} value={t} />
+            ))}
           </datalist>
-          
-          <label className="block mb-2">Writer</label>
+
+          <label className="block mb-2">Kirjailija</label>
           <input
             type="text"
-            placeholder="Syötä kirjoittaja tai valitse"
+            placeholder="Syötä kirjailijan nimi"
             className="w-full p-2 border rounded mb-4"
             list="writer-list"
             value={writer}
@@ -209,14 +206,15 @@ const BookForm = () => {
             required
           />
           <datalist id="writer-list">
-            {uniqueWriters
-              .map((t, idx) => <option key={idx} value={t} />)}
+            {uniqueWriters.map((t, idx) => (
+              <option key={idx} value={t} />
+            ))}
           </datalist>
-          
-          <label className="block mb-2">Publisher</label>
+
+          <label className="block mb-2">Kustantaja</label>
           <input
             type="text"
-            placeholder="Syötä julkaisija tai valitse"
+            placeholder="Syötä kustantajan nimi"
             className="w-full p-2 border rounded mb-4"
             list="publisher-list"
             value={publisher}
@@ -224,14 +222,15 @@ const BookForm = () => {
             required
           />
           <datalist id="publisher-list">
-            {uniquePublishers
-              .map((t, idx) => <option key={idx} value={t} />)}
+            {uniquePublishers.map((t, idx) => (
+              <option key={idx} value={t} />
+            ))}
           </datalist>
-          
-          <label className="block mb-2">Year</label>
+
+          <label className="block mb-2">Julkaisuvuosi</label>
           <input
             type="number"
-            placeholder="Syötä julkaisuvuosi tai valitse"
+            placeholder="Syötä tai valitse julkaisuvuosi"
             className="w-full p-2 border rounded mb-4"
             list="year-list"
             value={year}
@@ -239,95 +238,122 @@ const BookForm = () => {
             required
           />
           <datalist id="year-list">
-            {uniqueYears
-              .map((t, idx) => <option key={idx} value={t} />)}
+            {uniqueYears.map((t, idx) => (
+              <option key={idx} value={t} />
+            ))}
           </datalist>
-          <label className="block mb-2">Weight</label>
+          <label className="block mb-2">Paino</label>
           <input
             type="number"
-            placeholder="Syötä paino (g) tai valitse"
+            placeholder="Syötä tai valitse kirjan paino (grammoina)"
             step="any"
             className="w-full p-2 border rounded mb-4"
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
             required
           />
-          <label className="block mb-2">Type</label>
+          <label className="block mb-2">Tyyppi</label>
           <select
             className="w-full p-2 border rounded mb-4"
             value={typeName}
             onChange={(e) => setTypeName(e.target.value)}
             required
           >
-            <option value="" disabled>Valitse tyyppi</option>
+            <option value="" disabled>
+              Valitse tyyppi
+            </option>
             {typeOptions.map((t) => (
-              <option key={t} value={t}>{t}</option>
+              <option key={t} value={t}>
+                {t}
+              </option>
             ))}
           </select>
 
-          <label className="block mb-2">Class</label>
+          <label className="block mb-2">Luokka</label>
           <select
             className="w-full p-2 border rounded mb-4"
             value={className}
             onChange={(e) => setClassName(e.target.value)}
             required
           >
-            <option value="" disabled>Valitse luokka</option>
+            <option value="" disabled>
+              Valitse luokka
+            </option>
             {classOptions.map((c) => (
-              <option key={c} value={c}>{c}</option>
+              <option key={c} value={c}>
+                {c}
+              </option>
             ))}
           </select>
-          <label className="block mb-2">Store</label>
+          <label className="block mb-2">Kauppa</label>
           <select
             className="w-full p-2 border rounded mb-4"
             value={storeName}
             onChange={(e) => setStoreName(e.target.value)} // storeName sisältää nyt store.id
             required
           >
-            <option value="" disabled>Valitse kauppa</option>
+            <option value="" disabled>
+              Valitse kirjan omistava divari
+            </option>
             {stores.map((store) => (
               <option key={store.name} value={store.name}>
                 {store.name}
               </option>
             ))}
           </select>
-          <label className="block mb-2">Condition</label>
+          <label className="block mb-2">Kunto</label>
           <select
             className="w-full p-2 border rounded mb-4"
             value={condition}
             onChange={(e) => setCondition(e.target.value)}
             required
           >
-            <option value="" disabled>Valitse kunto</option>
+            <option value="" disabled>
+              Valitse kirjan kunto
+            </option>
             {conditionOptions.map((cond) => (
-              <option key={cond} value={cond}>{cond}</option>
+              <option key={cond} value={cond}>
+                {cond}
+              </option>
             ))}
           </select>
-          <label className="block mb-2">Purchase Price</label>
+          <label className="block mb-2">Ostohinta</label>
           <input
             type="number"
-            placeholder="Syötä ostohinta"
+            placeholder="Syötä tai valitse kirjan ostohinta"
             step="any"
             className="w-full p-2 border rounded mb-4"
             value={purchasePrice}
             onChange={(e) => setPurchasePrice(e.target.value)}
             required
           />
-          <label className="block mb-2">Sale Price</label>
+          <label className="block mb-2">Myyntihinta</label>
           <input
             type="number"
-            placeholder="Syötä jälleenmyynti hinta"
+            placeholder="Syötä tai valitse kirjan jälleenmyyntihinta"
             step="any"
             className="w-full p-2 border rounded mb-4"
             value={salePrice}
             onChange={(e) => setSalePrice(e.target.value)}
             required
           />
+          <label className="flex items-center space-x-2 mb-4">
+            <input
+              type="checkbox"
+              checked={addToSingleStore}
+              onChange={(e) => setAddToSingleStore(e.target.checked)}
+              className="w-4 h-4"
+            />
+            <span>
+              Valitsemalla tämän vaihtoehdon, kirjan tiedot lisätään keskusdivarin
+              lisäksi sen divarin tietokantaan, jolle kirja kuuluu.
+            </span>
+          </label>
           <button
             type="submit"
             className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-700"
           >
-            Add Book
+            Lisää kirja
           </button>
           <button
             type="button"

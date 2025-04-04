@@ -156,6 +156,13 @@ export const addStoreFromXml = async (xmlData) => {
       ],
     );
 
+    // Tallennetaan uuden divarin skeeman nimi mapping-tauluun
+    await client.query(
+      `INSERT INTO store_schema_mapping (store_id, schema_name)
+       VALUES ($1, $2)`,
+      [storeId, schemaName]
+    );
+
     // Prosessoidaan teostiedot
     const titles = Array.isArray(storeData.titles?.title)
       ? storeData.titles.title
