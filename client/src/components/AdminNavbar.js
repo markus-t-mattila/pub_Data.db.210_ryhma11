@@ -37,6 +37,7 @@ export default function AdminNavbar() {
             <Link to="/admin/dashboard" className="hover:underline">Dashboard</Link>
             <Link to="/admin/add-admin" className="hover:underline">Add Admin</Link>
             <Link to="/admin/add-book" className="hover:underline">Lisää kirja</Link>
+            <Link to="/admin/add-store" className="hover:underline">Add Store</Link>
             <button onClick={handleLogout} className="hover:underline">Logout</button>
           </div>
         ) : (

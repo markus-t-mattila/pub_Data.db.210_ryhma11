@@ -18,6 +18,7 @@ import { CartProvider } from './context/cartContext';
 import ShoppingCart from "./pages/ShoppingCart";
 import SingleBook from "./pages/SingleBook";
 import BookForm from "./pages/BooksForm";
+import AddStore from "./pages/AddStore"
 
 export default function App() {
 
@@ -77,6 +78,7 @@ export default function App() {
           <Route path="login" element={<AdminLogin />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="add-book" element={<BookForm />} />
+          <Route path="add-store" element={<AddStore />} />
         </Route>
       </Routes>
     </Router>
