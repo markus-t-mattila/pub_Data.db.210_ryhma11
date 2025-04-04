@@ -1,11 +1,11 @@
 import express from 'express';
 import { getCustomer, registerCustomer, loginCustomer, getMyProfile, createCustomersStatsFile } from '../controllers/customer.js';
-import { requireLogin } from '../middleware/auth.js'; 
+import { requireAdmin, requireLogin } from '../middleware/auth.js'; 
 
 const router = express.Router();
 
 // GET /api/customers/stats
-router.get('/stats', createCustomersStatsFile);
+router.get('/stats', requireAdmin, createCustomersStatsFile);
 
 // Kun selain tekee GET /api/customers?id=xxx tai ?email=xxx, ohjataan getCustomer-funktioon
 router.get('/', getCustomer);
