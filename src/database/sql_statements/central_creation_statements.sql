@@ -50,17 +50,6 @@ CREATE TABLE IF NOT EXISTS store (
   modified_at     TIMESTAMP         NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS store_schema_mapping (
-  store_id      UUID    PRIMARY KEY,
-  schema_name   TEXT    UNIQUE NOT NULL,
-
-  CONSTRAINT fk_store_id
-    FOREIGN KEY (store_id)
-    REFERENCES store (id)
-    ON DELETE CASCADE
-);
-
-
 CREATE TABLE IF NOT EXISTS purchase (
   id                UUID            PRIMARY KEY DEFAULT uuid_generate_v4(),
   date              TIMESTAMP       NOT NULL,
@@ -85,10 +74,8 @@ CREATE TABLE IF NOT EXISTS title (
   publisher     TEXT            NOT NULL,
   year          NUMERIC(4),
   weight        NUMERIC(6)      NOT NULL,
-  --type_id       UUID            NOT NULL,
-  --class_id      UUID            NOT NULL,
-  type       TEXT            NOT NULL, --otetaan suoraan arvo -> id tässä mielestäni turha
-  class      TEXT            NOT NULL, --otetaan suoraan arvo -> id tässä mielestäni turha
+  type          TEXT            NOT NULL,
+  class         TEXT            NOT NULL,
   created_at    TIMESTAMP       NOT NULL,
   modified_at   TIMESTAMP       NOT NULL,
 
@@ -203,6 +190,17 @@ CREATE TABLE IF NOT EXISTS admin_store (
     ON DELETE CASCADE,
 
   CONSTRAINT fk_admin_store_store
+    FOREIGN KEY (store_id)
+    REFERENCES store (id)
+    ON DELETE CASCADE
+);
+
+-- new table for mapping external stores' schema names
+CREATE TABLE IF NOT EXISTS store_schema_mapping (
+  store_id      UUID    PRIMARY KEY,
+  schema_name   TEXT    UNIQUE NOT NULL,
+
+  CONSTRAINT fk_store_id
     FOREIGN KEY (store_id)
     REFERENCES store (id)
     ON DELETE CASCADE
