@@ -177,3 +177,13 @@ export const bookEnums = async () => {
 export const distTitles = async () => {
   return api.get("/title");
 };
+
+export const addStore = async (formData) => {
+  try {
+    const response = await api.post("/stores", formData);
+    return response.data;
+  } catch (error) {
+    console.error("Virhe lisättäessä divaria:", error);
+    throw error;
+  }
+};
