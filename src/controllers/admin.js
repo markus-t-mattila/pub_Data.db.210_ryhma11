@@ -42,7 +42,7 @@ export const registerAdmin = async (req, res) => {
           (email, passwrd, is_central)
         VALUES
           ($1, $2, $3)
-        RETURNING email, is_central;
+        RETURNING id, email, is_central;
       `;
       const adminValues = [email, hashedPassword,is_central ?? false];
       const result = await client.query(insertAdminQuery, adminValues);

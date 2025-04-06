@@ -175,7 +175,7 @@ export default function ShoppingCart() {
               Tyhjennä ostoskori
             </button>
             <div className="mt-4">
-              {isLoggedIn ? (
+              {(isLoggedIn && userInfo) ? (
                 <button
                   onClick={handleOrderConfirm}
                   className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"

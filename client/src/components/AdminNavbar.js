@@ -6,7 +6,7 @@ import { useAdminAuth } from "../context/AdminAuthContext.js";
 export default function AdminNavbar() {
     const navigate = useNavigate();
     const { admin, setAdmin } = useAdminAuth(); // Päivitetään admin-tila automaattisesti
-  
+
     useEffect(() => {
       const checkAdminSession = async () => {
         try {
@@ -18,7 +18,7 @@ export default function AdminNavbar() {
       };
       checkAdminSession();
     }, [setAdmin]); // Tämä varmistaa päivityksen
-  
+
     const handleLogout = async () => {
       await logoutAdmin();
       setAdmin(null);
@@ -35,12 +35,16 @@ export default function AdminNavbar() {
         {admin ? (
           <div className="flex gap-4">
             <Link to="/admin/dashboard" className="hover:underline">Dashboard</Link>
-            <Link to="/admin/add-admin" className="hover:underline">Add Admin</Link>
+            {/* Disabled temporarily */}
+            {/* <Link to="/admin/add-admin" className="hover:underline">Add Admin</Link> */}
+            <Link to="/admin/customers-stats" className="hover:underline">Käyttäjätilastot</Link>
             <Link to="/admin/add-book" className="hover:underline">Lisää kirja</Link>
-            <button onClick={handleLogout} className="hover:underline">Logout</button>
+            <Link to="/admin/add-store" className="hover:underline">Lisää divari</Link>
+            <button onClick={handleLogout} className="hover:underline">Kirjaudu ulos</button>
           </div>
         ) : (
           <div className="flex gap-4">
+            <Link to="/" className="hover:underline">Käyttäjänäkymä</Link>
             <Link to="/admin/login" className="hover:underline">Kirjaudu</Link>
           </div>
         )}
