@@ -11,7 +11,7 @@ export default function Profile() {
 
 
   useEffect(() => {
-    if (!isLoggedIn) {
+    if (!isLoggedIn || !userInfo) {
       setForceLogin(true);
       return;
     }
