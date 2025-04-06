@@ -69,202 +69,196 @@ export const searchStores = async (req, res) => {
   }
 };
 
-/* *
- * Luo uuden divarin xml-tiedostosta.
- *   Uuden divarin ja sen teosten ja kirjojen tiedot lisätään sekä
- * luodun divarin kantaan että keskustietokantaan.
- *   Keskusdivarista ennestään löytyviä teostietoja ei lisätä sinne uudestaan,
- * eli olemassa olevat teokset lisätään vain uuden divarin kantaan.
- *   Uuden divarin tiedot parsitaan saadusta xml-tiedostosta.
- * Tietoja ei varmisteta muuten kuin sen osalta, että uuden divarin
- * nimistä divaria ei ennestään ole.
- * */
-export const addStoreFromXml = async (xmlData) => {
-  const parser = new XMLParser({ ignoreAttributes: false });
-  const storeData = parser.parse(xmlData).store;
 
-  if (!storeData) {
-    throw new Error("XML-tiedoston rakenne on virheellinen.");
+/**
+ * Luo uuden divarin XML-tiedostosta / tallentaa teostietoja olemassa olevalle divarille.
+ * - Divarin perustiedot otetaan req.body:stä (name, street_address, postcode, city, email, phone_num, website).
+ * - XML-tiedosto sisältää vain teosten tiedot (<teokset><teos> … </teokset>).
+ * - Jos ownDatabase on valittu, luodaan uusi skeema ja kopioidaan tarvittavat taulut sinne.
+ * - Mikäli yhden teoksen nideillä on eri painoja, muodostetaan kutakin painoryhmää varten oma title,
+ *   jolloin title-tasolla tallennetaan paino.
+ */
+export const addStoreFromXml = async (xmlData, storeDetails, ownDatabase) => {
+  // Parsitaan XML ja haetaan teosten tiedot
+  const parser = new XMLParser({ ignoreAttributes: false });
+  const xmlParsed = parser.parse(xmlData);
+  const teokset = xmlParsed.teokset;
+  if (!teokset || !teokset.teos) {
+    throw new Error("XML-tiedoston rakenne on virheellinen: teokset puuttuu.");
   }
 
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
 
-    // Tarkistetaan, onko lisättävn divarin nimi jo käytössä
+    // Tarkistetaan, onko divaria, jolla on sama nimi, jo olemassa.
+    // Jos on, käytetään olemassa olevaa store_id:tä, muuten luodaan uusi.
     const storeCheck = await client.query(
       "SELECT id FROM store WHERE name = $1",
-      [storeData.name],
+      [storeDetails.name]
     );
+    let storeId;
     if (storeCheck.rows.length > 0) {
-      throw new Error("Tämän niminen divari on jo olemassa.");
-    }
-
-    // Nimetään uuden divarin skeema: d<juokseva numero>_divari
-    const schemaQuery = await client.query(
-      `SELECT nspname FROM pg_namespace
-        WHERE nspname LIKE 'd%_divari'
-        ORDER BY nspname ASC`,
-    );
-
-    let nextSchemaNumber = 1;
-    const existingSchemas = schemaQuery.rows.map((row) => row.nspname);
-    while (existingSchemas.includes(`d${nextSchemaNumber}_divari`)) {
-      nextSchemaNumber++;
-    }
-
-    // Luodaan uudelle divarille oma skeema
-    const schemaName = `d${nextSchemaNumber}_divari`;
-    await client.query(`CREATE SCHEMA ${schemaName}`);
-
-    // Kopioidaan keskusdivarin book_class ja book_type taulut uuteen skeemaan
-    await client.query(
-      `CREATE TABLE ${schemaName}.book_type AS TABLE public.book_type WITH NO DATA`,
-    );
-    await client.query(
-      `CREATE TABLE ${schemaName}.book_class AS TABLE public.book_class WITH NO DATA`,
-    );
-    await client.query(
-      `INSERT INTO ${schemaName}.book_type (name) SELECT name FROM public.book_type`,
-    );
-    await client.query(
-      `INSERT INTO ${schemaName}.book_class (name) SELECT name FROM public.book_class`,
-    );
-
-    // Kopioidaan keskusdivarin title ja book taulujen rakenteet uuteen skeemaan
-    await client.query(
-      `CREATE TABLE ${schemaName}.title (LIKE public.title INCLUDING ALL)`,
-    );
-    await client.query(
-      `CREATE TABLE ${schemaName}.book (LIKE public.book INCLUDING ALL)`,
-    );
-
-    // Lisätään uuden divarin tiedot keskustietokantaan
-    const storeId = uuidv4();
-    await client.query(
-      `INSERT INTO store (id, name, street_address, postcode, city, email, phone_num, website, created_at, modified_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())`,
-      [
-        storeId,
-        storeData.name,
-        storeData.street_address,
-        storeData.postcode,
-        storeData.city,
-        storeData.email,
-        storeData.phone_num,
-        storeData.website,
-      ],
-    );
-
-    // Tallennetaan uuden divarin skeeman nimi mapping-tauluun
-    await client.query(
-      `INSERT INTO store_schema_mapping (store_id, schema_name)
-       VALUES ($1, $2)`,
-      [storeId, schemaName]
-    );
-
-    // Prosessoidaan teostiedot
-    const titles = Array.isArray(storeData.titles?.title)
-      ? storeData.titles.title
-      : [storeData.titles?.title];
-
-    for (const title of titles.filter(Boolean)) {
-      let titleId;
-
-      const titleCheck = await client.query(
-        `SELECT id FROM public.title WHERE isbn = $1`,
-        [title.isbn],
+      storeId = storeCheck.rows[0].id;
+    } else {
+      storeId = uuidv4();
+      await client.query(
+        `INSERT INTO store (id, name, street_address, postcode, city, email, phone_num, website, created_at, modified_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())`,
+        [
+          storeId,
+          storeDetails.name,
+          storeDetails.street_address,
+          storeDetails.postcode,
+          storeDetails.city,
+          storeDetails.email,
+          storeDetails.phone_num,
+          storeDetails.website
+        ]
       );
+    }
 
-      // Lisätään uudet teostiedot keskustietokantaan
-      if (titleCheck.rows.length > 0) {
-        titleId = titleCheck.rows[0].id;
+    // Jos ownDatabase on valittu, tarkistetaan onko skeema jo olemassa kyseiselle divarille.
+    let schemaName = null;
+    if (ownDatabase) {
+      const mapping = await client.query(
+        "SELECT schema_name FROM store_schema_mapping WHERE store_id = $1",
+        [storeId]
+      );
+      if (mapping.rows.length > 0) {
+        schemaName = mapping.rows[0].schema_name;
       } else {
-        titleId = uuidv4();
+        const schemaQuery = await client.query(
+          `SELECT nspname FROM pg_namespace
+           WHERE nspname LIKE 'd%_divari'
+           ORDER BY nspname ASC`
+        );
+        let nextSchemaNumber = 1;
+        const existingSchemas = schemaQuery.rows.map((row) => row.nspname);
+        while (existingSchemas.includes(`d${nextSchemaNumber}_divari`)) {
+          nextSchemaNumber++;
+        }
+        schemaName = `d${nextSchemaNumber}_divari`;
+        await client.query(`CREATE SCHEMA ${schemaName}`);
+
         await client.query(
-          `INSERT INTO public.title (id, isbn, name, writer, publisher, year, weight, type, class, created_at, modified_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())`,
-          [
-            titleId,
-            title.isbn,
-            title.name,
-            title.writer,
-            title.publisher,
-            parseInt(title.year, 10),
-            parseInt(title.weight, 10),
-            title.type,
-            title.class,
-          ],
+          `CREATE TABLE ${schemaName}.book_type AS TABLE public.book_type WITH NO DATA`
+        );
+        await client.query(
+          `CREATE TABLE ${schemaName}.book_class AS TABLE public.book_class WITH NO DATA`
+        );
+        await client.query(
+          `INSERT INTO ${schemaName}.book_type (name) SELECT name FROM public.book_type`
+        );
+        await client.query(
+          `INSERT INTO ${schemaName}.book_class (name) SELECT name FROM public.book_class`
+        );
+
+        await client.query(
+          `CREATE TABLE ${schemaName}.title (LIKE public.title INCLUDING ALL)`
+        );
+        await client.query(
+          `CREATE TABLE ${schemaName}.book (LIKE public.book INCLUDING ALL)`
+        );
+
+        await client.query(
+          `INSERT INTO store_schema_mapping (store_id, schema_name)
+           VALUES ($1, $2)`,
+          [storeId, schemaName]
         );
       }
+    }
 
-      // Lisätään teostiedot uuden divarin skeemaan
-      await client.query(
-        `INSERT INTO ${schemaName}.title (id, isbn, name, writer, publisher, year, weight, type, class, created_at, modified_at)
-          VALUES ($1, $2, $3, $4, $5, $6, $7,
-            (SELECT name FROM ${schemaName}.book_type WHERE name = $8),
-            (SELECT name FROM ${schemaName}.book_class WHERE name = $9),
-            NOW(), NOW())`,
-        [
-          titleId,
-          title.isbn,
-          title.name,
-          title.writer,
-          title.publisher,
-          parseInt(title.year, 10),
-          parseInt(title.weight, 10),
-          title.type,
-          title.class,
-        ],
-      );
+    // Prosessoidaan teostiedot XML:stä.
+    const teosArray = Array.isArray(teokset.teos) ? teokset.teos : [teokset.teos];
+    for (const teos of teosArray.filter(Boolean)) {
+      const ttiedot = teos.ttiedot;
+      if (!ttiedot) continue;
 
-      // Prosessoidaan nidetiedot
-      const books = Array.isArray(title.books?.book)
-        ? title.books.book
-        : [title.books?.book];
+      // Ryhmitellään nide-elementit painon (paino) mukaan
+      const nideData = Array.isArray(teos.nide) ? teos.nide : [teos.nide];
+      const weightGroups = {};
+      for (const nide of nideData.filter(Boolean)) {
+        // Oletetaan, että paino on pakollinen, mutta jos puuttuu, käytetään arvoa 0
+        const weightValue = nide.paino ? parseFloat(nide.paino) : 0;
+        if (!weightGroups[weightValue]) {
+          weightGroups[weightValue] = [];
+        }
+        weightGroups[weightValue].push(nide);
+      }
 
-      for (const book of books.filter(Boolean)) {
-        const bookId = uuidv4();
-
-        const validConditions = new Set(["NEW", "GOOD", "FAIR", "POOR"]);
-        const bookCondition = validConditions.has(book.condition.toUpperCase())
-          ? book.condition.toUpperCase()
-          : "GOOD"; // Jos kirjan kuntoa ei ole annettu, asetetaan oletusarvo
-
-        // Lisätään nidetiedot keskustietokantaan
-        await client.query(
-          `INSERT INTO public.book (id, title_id, purchase_id, store_id, condition, purchase_price, sale_price, status, created_at, modified_at)
-            VALUES ($1, $2, NULL, $3, $4, $5, $6, $7, NOW(), NOW())`,
-          [
-            bookId,
-            titleId,
-            storeId,
-            bookCondition,
-            parseFloat(book.purchase_price),
-            parseFloat(book.sale_price),
-            book.status,
-          ],
+      // Jos nideillä on useampia eri painoja, luodaan jokaiselle painoryhmälle oma title.
+      // Jos vain yksi paino löytyy, luodaan yksi title.
+      for (const weightKey in weightGroups) {
+        let titleId;
+        const weightValue = parseFloat(weightKey);
+        // Tarkistetaan, onko teokselle jo title olemassa, tunnistettuna isbn:llä ja painolla.
+        const titleCheck = await client.query(
+          `SELECT id FROM public.title WHERE isbn = $1 AND weight = $2`,
+          [ttiedot.isbn, weightValue]
         );
+        if (titleCheck.rows.length > 0) {
+          titleId = titleCheck.rows[0].id;
+        } else {
+          titleId = uuidv4();
+          await client.query(
+            `INSERT INTO public.title (id, isbn, name, writer, publisher, weight, type, class, created_at, modified_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())`,
+            [
+              titleId, 
+              ttiedot.isbn, 
+              ttiedot.nimi,
+              ttiedot.tekija,
+              ttiedot.kustantaja || 'unknown',
+              weightValue,
+              ttiedot.tyyppi || 'OTHER',
+              ttiedot.luokka || 'OTHER'] 
+          );
+        }
+        if (ownDatabase && schemaName) {
+          await client.query(
+            `INSERT INTO ${schemaName}.title (id, isbn, name, writer, publisher, weight, type, class, created_at, modified_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())`,
+             [
+              titleId, 
+              ttiedot.isbn, 
+              ttiedot.nimi,
+              ttiedot.tekija,
+              ttiedot.kustantaja || 'unknown',
+              weightValue,
+              ttiedot.tyyppi || 'OTHER',
+              ttiedot.luokka || 'OTHER'] 
+          );
+        }
 
-        // Lisätään nidetiedot uuden divarin skeemaan
-        await client.query(
-          `INSERT INTO ${schemaName}.book (id, title_id, purchase_id, store_id, condition, purchase_price, sale_price, status, created_at, modified_at)
-            VALUES ($1, $2, NULL, $3, $4, $5, $6, $7, NOW(), NOW())`,
-          [
-            bookId,
-            titleId,
-            storeId,
-            bookCondition,
-            parseFloat(book.purchase_price),
-            parseFloat(book.sale_price),
-            book.status,
-          ],
-        );
+        // Lisätään kaikki kyseisen painoryhmän nide-elementit viitaten tähän titleId:hen
+        const groupNides = weightGroups[weightKey];
+        for (const nide of groupNides) {
+          const bookId = uuidv4();
+          const hinta = parseFloat(nide.hinta);
+          await client.query(
+            `INSERT INTO public.book (id, title_id, purchase_id, store_id, condition, purchase_price, sale_price, status, created_at, modified_at)
+             VALUES ($1, $2, NULL, $3, $4, $5, $6, $7, NOW(), NOW())`,
+            [bookId, titleId, storeId, "GOOD", hinta, hinta, "AVAILABLE"]
+          );
+          if (ownDatabase && schemaName) {
+            await client.query(
+              `INSERT INTO ${schemaName}.book (id, title_id, purchase_id, store_id, condition, purchase_price, sale_price, status, created_at, modified_at)
+               VALUES ($1, $2, NULL, $3, $4, $5, $6, $7, NOW(), NOW())`,
+              [bookId, titleId, storeId, "GOOD", hinta, hinta, "AVAILABLE"]
+            );
+          }
+        }
       }
     }
 
     await client.query("COMMIT");
-    return { message: `Store added successfully under schema: ${schemaName}` };
+    return {
+      message:
+        ownDatabase && schemaName
+          ? `Store added successfully under schema: ${schemaName}`
+          : "Store added successfully"
+    };
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;

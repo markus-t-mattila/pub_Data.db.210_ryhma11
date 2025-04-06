@@ -15,10 +15,25 @@ router.post("/", upload.single("xmlData"), async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ error: "Hyväksytyt tiedostotyypit: .xml" });
     }
-
-    // Muutetaan xml merkkijonoksi ja välitetään se parametrina
+    // Muutetaan XML-tiedoston data merkkijonoksi
     const xmlData = req.file.buffer.toString("utf-8");
-    const result = await addStoreFromXml(xmlData);
+
+    // Kerätään divarin perustiedot lomakkeesta
+    const storeDetails = {
+      name: req.body.name,
+      street_address: req.body.street_address,
+      postcode: req.body.postcode,
+      city: req.body.city,
+      email: req.body.email,
+      phone_num: req.body.phone_num,
+      website: req.body.website || ""
+    };
+
+    // Muunnetaan ownDatabase kenttä boolean-muotoon
+    const ownDatabase = req.body.ownDatabase === "true" || req.body.ownDatabase === true;
+
+    // Kutsutaan controlleria kaikilla tarvittavilla parametreilla
+    const result = await addStoreFromXml(xmlData, storeDetails, ownDatabase);
 
     res.status(201).json(result);
   } catch (error) {
