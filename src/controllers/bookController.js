@@ -7,7 +7,10 @@ export const searchBooks = async (req, res) => {
     return res.status(400).json({ error: 'Missing search term' });
   }
   const query = `
-    WITH matches AS (
+    WITH search_terms AS (
+      SELECT unnest(string_to_array(lower($1), ' ')) AS term
+    ),
+    matches AS (
       SELECT
         t.isbn,
         t.name,
@@ -17,14 +20,22 @@ export const searchBooks = async (req, res) => {
         t.type,
         t.class,
         b.sale_price,
-        (LENGTH(LOWER(t.name)) - LENGTH(REPLACE(LOWER(t.name), LOWER($1), ''))) AS matches_full_word,
-        CASE WHEN t.name ILIKE '%' || $1 || '%' THEN 1 ELSE 0 END AS matches_partial
+        (
+          SELECT count(*)
+          FROM search_terms st
+          WHERE lower(t.name) ~ ('(^|\\W)' || st.term || '($|\\W)')
+        )::int AS matches_full_word,
+        (
+          SELECT count(*)
+          FROM search_terms st
+          WHERE lower(t.name) LIKE '%' || st.term || '%'
+        )::int AS matches_partial
       FROM book b
       JOIN title t ON b.title_id = t.id
     )
     SELECT *
     FROM matches
-    WHERE matches_full_word > 0 OR matches_partial = 1
+    WHERE matches_full_word > 0 OR matches_partial > 0
     ORDER BY matches_full_word DESC, matches_partial DESC;
   `;
   try {
