@@ -70,11 +70,7 @@ const AddStore = () => {
               required
             />
             <div className="text-sm text-gray-500">
-              <a
-                href="path_to_example/example.xml"
-                download
-                className="hover:underline"
-              >
+              <a href="/d3.xml" download className="hover:underline">
                 Esimerkkitiedosto
               </a>
             </div>
