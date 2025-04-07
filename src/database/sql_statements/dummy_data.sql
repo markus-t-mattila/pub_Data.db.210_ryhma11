@@ -7,9 +7,8 @@ INSERT INTO customer (id, name, email, passwrd, phone, street_address, postcode,
 ('55555555-5555-5555-5555-555555555555', 'Kari Kivinen', 'kari.kivinen@example.com', 'salasana5', '0456677889', 'Torikatu 7', 90100, 'Oulu', NOW(), NOW());
 
 INSERT INTO store (id, name, street_address, postcode, city, email, phone_num, website, created_at, modified_at) VALUES
-('a1111111-1111-1111-1111-111111111111', 'Kirjakauppa Keskus', 'Keskuskatu 2', 00100, 'Helsinki', 'keskus@kauppa.fi', '0911122233', 'http://kirjakauppakeskus.fi', NOW(), NOW()),
-('a2222222-2222-2222-2222-222222222222', 'Kirjakauppa Itä', 'Itäkatu 5', 00200, 'Helsinki', 'ita@kauppa.fi', '0911222333', 'http://kirjakauppaite.fi', NOW(), NOW()),
-('a3333333-3333-3333-3333-333333333333', 'Kirjakauppa Pohjoinen', 'Pohjoiskatu 3', 90100, 'Oulu', 'pohjoinen@kauppa.fi', '0911333444', 'http://kirjakauppapohjoinen.fi', NOW(), NOW());
+('a1111111-1111-1111-1111-111111111111', 'Lassen lehti', 'Keskuskatu 2', 00100, 'Helsinki', 'lassen@lehti.fi', '0911122233', 'http://kirjakauppakeskus.fi', NOW(), NOW()),
+('a2222222-2222-2222-2222-222222222222', 'Galleinn Galle', 'Itäkatu 5', 00200, 'Helsinki', 'galleinn@galle.fi', '0911222333', 'http://kirjakauppaite.fi', NOW(), NOW());
 
 INSERT INTO purchase (id, date, total_price, shipping_price, customer_id, created_at, modified_at) VALUES
 ('b1111111-1111-1111-1111-111111111111', NOW() - INTERVAL '15 days', 55.50, 5.00, '11111111-1111-1111-1111-111111111111', NOW() - INTERVAL '15 days', NOW() - INTERVAL '15 days'),
