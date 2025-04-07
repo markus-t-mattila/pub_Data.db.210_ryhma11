@@ -2,7 +2,7 @@
  * tiedot keskusdivarin tietokantaan. Tiedot annetaan
  * xml-tiedostona.
  * */
-
+import { addStore } from "../services/api";
 import { useState } from "react";
 
 const AddStore = () => {
@@ -29,16 +29,8 @@ const AddStore = () => {
     formData.append("xmlData", file);
 
     try {
-      const response = await fetch("http://localhost:3000/stores", {
-        method: "POST",
-        body: formData,
-        credentials: "include", // Jos istunnot käytössä
-      });
-
-      if (!response.ok) {
-        throw new Error("Tiedoston lähetys epäonnistui.");
-      }
-
+      // addStore-funktio api.js tiedostosta
+      await addStore(formData);
       setSuccess("Uusi divari lisätty!");
       setError("");
     } catch (err) {

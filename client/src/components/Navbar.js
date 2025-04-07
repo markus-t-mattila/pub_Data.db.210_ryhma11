@@ -10,7 +10,7 @@ export default function Navbar() {
   const { isLoggedIn, logout, login, setForceLogin } = useContext(AuthContext);
   const { cartItems } = useCart();
 
-  console.log("Navbar cartItems:", cartItems);
+  //console.log("Navbar cartItems:", cartItems);
   const handleLogout = () => {
     navigate("/");
     setTimeout(() => {
@@ -50,7 +50,8 @@ export default function Navbar() {
             isLoggedIn && { to: "/profile", label: "Oma sivu" },
             isLoggedIn && { onClick: handleLogout, label: "Kirjaudu ulos" },
             { to: "/classes", label: "Teosluokat" },
-            { to: "/books", label: "Kirjat" }
+            { to: "/books", label: "Kirjat" },
+            { to: "/admin", label: "Ylläpitopaneeli" }
           ]
             .filter(Boolean)
             .map((item, index) =>
