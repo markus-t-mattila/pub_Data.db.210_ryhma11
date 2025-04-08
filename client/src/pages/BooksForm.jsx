@@ -38,7 +38,7 @@ const BookForm = () => {
           ? await searchAllStores()
           : await searchStoresByIds(admin.stores || []);
         setStores(storeData);
-  
+
         const enums = await bookEnums();
         //console.log(enums.data);
         setTypeOptions(enums.data.type || []);
@@ -57,7 +57,7 @@ const BookForm = () => {
 
   useEffect(() => {
     if (!isbn) return;
-  
+
     const match = distinctTitles.find((t) => t.isbn === isbn);
     if (match) {
       if (!name) setName(match.name);
@@ -172,7 +172,6 @@ const BookForm = () => {
             list="isbn-list"
             value={isbn}
             onChange={(e) => setIsbn(e.target.value)}
-            required
           />
           <datalist id="isbn-list">
             {uniqueIsbns.map((t, idx) => (
@@ -285,7 +284,7 @@ const BookForm = () => {
               </option>
             ))}
           </select>
-          <label className="block mb-2">Kauppa</label>
+          <label className="block mb-2">Myyjä</label>
           <select
             className="w-full p-2 border rounded mb-4"
             value={storeName}
@@ -345,8 +344,7 @@ const BookForm = () => {
               className="w-4 h-4"
             />
             <span>
-              Valitsemalla tämän vaihtoehdon, kirjan tiedot lisätään keskusdivarin
-              lisäksi sen divarin tietokantaan, jolle kirja kuuluu.
+              Lisää kirja myös myyjän omaan kantaan
             </span>
           </label>
           <button

@@ -206,7 +206,7 @@ export const addBookWithTitleService = async (req, res) => {
     !purchase_price ||
     !sale_price
   ) {
-    return res.status(400).json({ error: "Missing required fields" });
+    return res.status(400).json({ error: "Pakollisia tietoja puuttuu" });
   }
 
   const client = await pool.connect();
@@ -227,18 +227,18 @@ export const addBookWithTitleService = async (req, res) => {
     // Tarkistetaan että tyypit ovat validit
     if (!allowedTypes.includes(typeNameNormalized)) {
       return res.status(400).json({
-        error: 'Invalid type_name',
+        error: 'Laiton type_name',
         allowed_types: allowedTypes
       });
     }
     if (!allowedClasses.includes(classNameNormalized)) {
       return res.status(400).json({
-        error: 'Invalid class_name',
+        error: 'Laiton class_name',
         allowed_classes: allowedClasses
       });
     }
 
-    // Tarkistetaan löytyykö jo kyseinen title
+    // Tarkistetaan löytyykö kyseinen title keskustietokannasta
     const existing = await client.query(
       `SELECT id FROM title
        WHERE LOWER(name) = LOWER($1) AND LOWER(writer) = LOWER($2) AND year = $3 AND LOWER(publisher) = LOWER($4)`,
@@ -282,14 +282,14 @@ export const addBookWithTitleService = async (req, res) => {
     if (!matchingStore) {
       await client.query('ROLLBACK');
       return res.status(400).json({
-        error: `Store '${store_name}' not found`,
+        error: `Divaria '${store_name}' ei löytynyt`,
         allowed_stores: storeRes.rows.map(row => row.name)
       });
     }
 
     const storeId = matchingStore.id;
 
-    // Lisätään uusi book instanssi
+    // Lisätään uusi book instanssi keskustietokantaan
     const bookId = uuidv4();
     await client.query(
       `INSERT INTO book (
@@ -308,8 +308,9 @@ export const addBookWithTitleService = async (req, res) => {
       ]
     );
 
-    /*** Lisätään kirja myös sen omistavan divarin tietokantaan, ***/
-    /*** jos käyttäjä on valinnut sen lisättäväksi ***/
+    /* Lisätään kirja myös sen omistavan divarin tietokantaan, */
+    /* jos käyttäjä on valinnut sen lisättäväksi */
+    /* ja jos kyseisellä divarillä on oma skeema */
     if (add_to_single_store) {
       // Haetaan divarin skeeman nimi id:n perusteella
       const schemaRes = await client.query(
@@ -319,7 +320,7 @@ export const addBookWithTitleService = async (req, res) => {
       if (schemaRes.rows.length === 0) {
         await client.query("ROLLBACK");
         return res.status(400).json({
-          error: `No schema found for store '${store_name}'`,
+          error: `Divarille '${store_name}' ei löytynyt tietokantaa. Kirja voidaan lisätä vain keskustietokantaan.`,
         });
       }
       const storeSchema = schemaRes.rows[0].schema_name;
