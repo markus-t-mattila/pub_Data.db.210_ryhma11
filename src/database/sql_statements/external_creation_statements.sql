@@ -1,10 +1,9 @@
--- Creation statements for external divari, only includes title and book data
+-- Luontilauseet skeemalle d1_divari (Lassen lehti)
 
 -- book type
 CREATE TABLE IF NOT EXISTS d1_divari.book_type (
     name TEXT UNIQUE NOT NULL
 );
-
 INSERT INTO d1_divari.book_type (name) VALUES
     ('HARDCOVER'),
     ('PAPERBACK'),
@@ -15,12 +14,12 @@ INSERT INTO d1_divari.book_type (name) VALUES
 CREATE TABLE IF NOT EXISTS d1_divari.book_class (
     name TEXT UNIQUE NOT NULL
 );
-
 INSERT INTO d1_divari.book_class (name) VALUES
     ('FICTION'),
     ('NONFICTION'),
     ('COMIC'),
     ('OTHER');
+
 
 CREATE TABLE IF NOT EXISTS d1_divari.title (
     id          UUID            PRIMARY KEY DEFAULT uuid_generate_v4 (),
@@ -28,18 +27,18 @@ CREATE TABLE IF NOT EXISTS d1_divari.title (
     name        TEXT            NOT NULL,
     writer      TEXT            NOT NULL,
     publisher   TEXT            NOT NULL,
-    year        NUMERIC(4),
+    year        NUMERIC(4)      NOT NULL,
     weight      NUMERIC(6)      NOT NULL,
     type        TEXT            NOT NULL,
     class       TEXT            NOT NULL,
     created_at  TIMESTAMP       NOT NULL,
     modified_at TIMESTAMP       NOT NULL,
-    
+
     CONSTRAINT fk_type_id
         FOREIGN KEY (type)
         REFERENCES d1_divari.book_type (name)
         ON DELETE RESTRICT,
-        
+
     CONSTRAINT fk_class_id
         FOREIGN KEY (class)
         REFERENCES d1_divari.book_class (name)
@@ -57,7 +56,7 @@ CREATE TABLE IF NOT EXISTS d1_divari.book (
     status          status_enum     NOT NULL,
     created_at      TIMESTAMP       NOT NULL,
     modified_at     TIMESTAMP       NOT NULL,
-    
+
     CONSTRAINT fk_book_title
         FOREIGN KEY (title_id)
         REFERENCES d1_divari.title (id)

@@ -320,7 +320,7 @@ export const addBookWithTitleService = async (req, res) => {
       if (schemaRes.rows.length === 0) {
         await client.query("ROLLBACK");
         return res.status(400).json({
-          error: `Divarille '${store_name}' ei löytynyt tietokantaa. Kirja voidaan lisätä vain keskustietokantaan.`,
+          error: `Divarille '${store_name}' ei löytynyt omaa tietokantaa. Kirja voidaan lisätä vain keskustietokantaan.`,
         });
       }
       const storeSchema = schemaRes.rows[0].schema_name;

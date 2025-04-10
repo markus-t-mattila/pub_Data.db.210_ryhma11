@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS title (
   name          TEXT            NOT NULL,
   writer        TEXT            NOT NULL,
   publisher     TEXT            NOT NULL,
-  year          NUMERIC(4),
+  year          NUMERIC(4)      NOT NULL,
   weight        NUMERIC(6)      NOT NULL,
   type          TEXT            NOT NULL,
   class         TEXT            NOT NULL,
