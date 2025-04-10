@@ -24,7 +24,7 @@ const AddStore = () => {
   useEffect(() => {
     const fetchStores = async () => {
       try {
-        const stores = await searchAllStores(); 
+        const stores = await searchAllStores();
         setAvailableStores(stores);
       } catch (err) {
         console.error("Virhe divarien haussa:", err);
@@ -200,17 +200,12 @@ const AddStore = () => {
               required
             />
             <div className="text-sm text-gray-500">
-<<<<<<< HEAD
-              <a href="/d3.xml" download className="hover:underline">
-                Esimerkkitiedosto
-=======
               <a
                 href="https://tie-tkannat.it.tuni.fi/~ksmama/example.xml"
                 download
                 className="hover:underline"
               >
                 Lataa esimerkkitiedosto
->>>>>>> 6585469edf491567099514896e8f6bd079254dd1
               </a>
             </div>
           </div>
