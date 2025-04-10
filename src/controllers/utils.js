@@ -1,11 +1,18 @@
 import cron from 'node-cron';
 import { releaseExpiredReservations } from './purchase.js';
+import { syncCentralDB } from './stores.js';
 import pool from "../config/db.js";
 
 // Aja joka minuutti
 cron.schedule('* * * * *', () => {
   console.log('Tarkistetaan vanhentuneet varaukset...');
   releaseExpiredReservations();
+});
+
+// Aja joka toinen minuutti
+cron.schedule('*/2 * * * *', () => {
+  console.log('Synkronoidaan keskustietokanta...');
+  syncCentralDB();
 });
 
 export const minimizeShipping = async (weights) =>{

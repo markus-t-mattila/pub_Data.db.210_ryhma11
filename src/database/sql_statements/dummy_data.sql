@@ -64,6 +64,9 @@ INSERT INTO shipment_item (shipment_id, book_id) VALUES
 ('f1111111-1111-1111-1111-111111111111', 'ed444444-4444-4444-4444-444444444444'),
 ('f2222222-2222-2222-2222-222222222222', 'e2222222-2222-2222-2222-222222222222');
 
+INSERT INTO store_schema_mapping (store_id, schema_name) VALUES
+('a1111111-1111-1111-1111-111111111111', 'd1_divari');
+
 
 -- divarin Kallen Lehti (d1_divari) teokset lisätään omaan skeemaansa
 

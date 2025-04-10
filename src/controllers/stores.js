@@ -266,3 +266,92 @@ export const addStoreFromXml = async (xmlData, storeDetails, ownDatabase) => {
     client.release();
   }
 };
+
+
+/* Triggeri, joka synkronoi keskusdivarin tietokannan joka toinen minuutti */
+export const syncCentralDB = async () => {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    // Haetaan kaikkien divareiden skeemat
+    const schemaRes = await client.query("SELECT store_id, schema_name FROM store_schema_mapping");
+
+    for (const { store_id, schema_name } of schemaRes.rows) {
+      // Lisätään kaikki puuttuvat teokset keskusdivariin
+      const insertTitles = await client.query(`
+        INSERT INTO title (id, isbn, name, writer, publisher, year, weight, type, class, created_at, modified_at)
+        SELECT t.id, t.isbn, t.name, t.writer, t.publisher, t.year, t.weight, t.type, t.class, t.created_at, t.modified_at
+        FROM ${schema_name}.title t
+        WHERE NOT EXISTS (
+          SELECT 1 FROM title WHERE id = t.id
+        )
+      `);
+      
+      // Päivitetään olemassa olevat teostiedot jos niitä on muokattu
+      const updateTitles = await client.query(`
+        UPDATE title AS central
+        SET
+          isbn = t.isbn,
+          name = t.name,
+          writer = t.writer,
+          publisher = t.publisher,
+          year = t.year,
+          weight = t.weight,
+          type = t.type,
+          class = t.class,
+          modified_at = t.modified_at
+        FROM ${schema_name}.title t
+        WHERE central.id = t.id
+          AND t.modified_at > central.modified_at
+      `);
+
+      // Lisätään kaikki puuttuvat kirjat keskusdivariin
+      const insertBooks = await client.query(`
+        INSERT INTO book (id, title_id, purchase_id, store_id, condition, purchase_price, sale_price, status, created_at, modified_at)
+        SELECT b.id, b.title_id, b.purchase_id, b.store_id, b.condition, b.purchase_price, b.sale_price, b.status, b.created_at, b.modified_at
+        FROM ${schema_name}.book b
+        WHERE NOT EXISTS (
+          SELECT 1 FROM book WHERE id = b.id
+        )
+      `);
+      
+      // Päivitetään olemassa olevat kirjat jos niiden tietoja on muokattu
+      const updateBooks = await client.query(`
+        UPDATE book AS central
+        SET
+          title_id = b.title_id,
+          purchase_id = b.purchase_id,
+          store_id = b.store_id,
+          condition = b.condition,
+          purchase_price = b.purchase_price,
+          sale_price = b.sale_price,
+          status = b.status,
+          modified_at = b.modified_at
+        FROM ${schema_name}.book b
+        WHERE central.id = b.id
+          AND b.modified_at > central.modified_at
+      `);
+
+      if (
+        insertTitles.rowCount > 0 ||
+        insertBooks.rowCount > 0 ||
+        updateTitles.rowCount > 0 ||
+        updateBooks.rowCount > 0
+      ) {
+        console.log(
+          `Synkronoitu ${schema_name}: lisätty ${insertTitles.rowCount} teosta ja ${insertBooks.rowCount} kirjaa, ` +
+          `päivitetty ${updateTitles.rowCount} teosta ja ${updateBooks.rowCount} kirjaa.`
+        );
+      }
+    }
+
+    await client.query("COMMIT");
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error("Synkronointivirhe:", err.message);
+  } finally {
+    client.release();
+  }
+};
