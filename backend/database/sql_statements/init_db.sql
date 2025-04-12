@@ -22,13 +22,13 @@ $$ LANGUAGE SQL IMMUTABLE;
 
 CREATE SCHEMA d1_divari;
 
-\i ./src/database/sql_statements/shared_statements.sql;
+\i ./backend/database/sql_statements/shared_statements.sql;
 
-\i ./src/database/sql_statements/central_creation_statements.sql;
+\i ./backend/database/sql_statements/central_creation_statements.sql;
 
-\i ./src/database/sql_statements/external_creation_statements.sql;
+\i ./backend/database/sql_statements/external_creation_statements.sql;
 
-\i ./src/database/sql_statements/dummy_data.sql;
+\i ./backend/database/sql_statements/dummy_data.sql;
 
 GRANT ALL PRIVILEGES ON DATABASE central_divari TO divari_user;
 GRANT ALL PRIVILEGES ON SCHEMA d1_divari, public TO divari_user;

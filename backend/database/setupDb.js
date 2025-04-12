@@ -16,8 +16,8 @@ psql -h ${PG_HOST} -U ${PG_USER} -W -c "GRANT ALL PRIVILEGES ON DATABASE ${PG_DB
 `;
 
 // Komennot tietokannan alustamiseen
-const RESET_DB_COMMAND = `psql -h ${PG_HOST} -U ${PG_USER} -f src/database/sql_statements/reset_db.sql`;
-const INIT_DB_COMMAND = `psql -h ${PG_HOST} -U ${PG_USER} -f src/database/sql_statements/init_db.sql`;
+const RESET_DB_COMMAND = `psql -h ${PG_HOST} -U ${PG_USER} -f backend/database/sql_statements/reset_db.sql`;
+const INIT_DB_COMMAND = `psql -h ${PG_HOST} -U ${PG_USER} -f backend/database/sql_statements/init_db.sql`;
 
 console.log("Resetoidaan tietokanta...");
 
