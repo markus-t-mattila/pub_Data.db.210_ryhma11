@@ -20,11 +20,11 @@ import {getEnums} from './controllers/utils.js';
 dotenv.config({ path: "../.env" });
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Salli kaikki pyynnöt frontendiltä
 app.use(cors({
-  origin: 'http://localhost:5173', // jos frontti on portissa 5173
+  origin: 'http://localhost:3000', // jos frontti on portissa 3000
   credentials: true               // salli evästeet
 }));
 

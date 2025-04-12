@@ -6,8 +6,7 @@ dotenv.config();
 
 const PG_USER = process.env.DB_USER || "postgres";
 const PG_HOST = process.env.DB_HOST || "localhost";
-const PG_PASSWORD = process.env.DB_PASSWORD || "";
-const PG_DB = process.env.DB_NAME || "central_divari";
+const PG_DB = "central_divari";
 
 
 const CREATE_USER_COMMAND = `
