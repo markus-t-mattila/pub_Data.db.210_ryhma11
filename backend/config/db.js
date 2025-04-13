@@ -1,10 +1,19 @@
 import pkg from 'pg';
-import dotenv from 'dotenv';
-
-// huom oletuksena .env tiedosto on juuressa
-dotenv.config({path:'../../.env'});
 
 const { Pool } = pkg;
+
+// asetetaan tiedot tietokanta yhteyttä varten
+console.log("Tietokannan asetukset, joko ympäristömuuttujista tai suoraan:");
+const details = {
+  user: process.env.DB_USER || 'divari_user',
+  host: process.env.DB_HOST || 'localhost',
+  database: process.env.DB_NAME || 'central_divari',
+  password: process.env.DB_PASSWORD || 'password',  
+  port: process.env.DB_PORT || 5432,
+};
+
+console.log("Tietokannan asetukset:", details);
+
 
 // Luodaan uusi yhteyspooli PostgreSQL-tietokantaa varten
 const pool = new Pool({

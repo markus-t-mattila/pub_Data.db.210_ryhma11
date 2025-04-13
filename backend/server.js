@@ -1,6 +1,11 @@
+import 'dotenv/config'; // pakotetaan latautumaan jotta saadaan muuttujat käyttoon
+
+
+// tarkastetaan kayttaja
+console.log(process.env.DB_USER);
+
 import express from 'express';
 import session from 'express-session'; // Lisätty express-session
-import dotenv from 'dotenv'; // Lisätty dotenv
 import cors from 'cors'; // Lisätty CORS
 import pool from "./config/db.js"; // Tietokantayhteys
 import bookRoutes from './routes/bookRoutes.js';
@@ -16,8 +21,6 @@ import orderRoutes from './routes/orders.js'; // Lisätty tilausreitit
 import {getEnums} from './controllers/utils.js';
 
 
-// Lataa ympäristömuuttujat (varmista, että polku on oikein)
-dotenv.config({ path: "../.env" });
 
 const app = express();
 const PORT = process.env.PORT || 3001;
