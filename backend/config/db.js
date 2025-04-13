@@ -1,3 +1,4 @@
+import 'dotenv/config'; // Ladataan ympäristömuuttujat .env-tiedostosta
 import pkg from 'pg';
 
 const { Pool } = pkg;

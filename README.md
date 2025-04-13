@@ -73,7 +73,7 @@ serve -s build
 Siirry backend-kansioon ja asenna riippuvuudet:
 
 ```
-cd client
+cd backend
 npm install
 ```
 
