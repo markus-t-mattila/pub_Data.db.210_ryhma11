@@ -261,10 +261,10 @@ export default function Books() {
                           <td className="border p-2">{book.type}</td>
                           <td className="border p-2">{book.class}</td>
                           <td className="border p-2">{parseFloat(book.sale_price).toFixed(2)}€</td>
-                          <td className="border p-2"></td>
-                          <td className="border p-2"></td>
+                          <td className="border p-2">{parseFloat(book.sale_price).toFixed(2)}€</td>
                           <td className="border p-2">{book.isbn}</td>
                           <td className="border p-2">{book.weight} g</td>
+                          <td className="border p-2 text-canter">1</td>
                         </tr>
                       ))}
                   </>
