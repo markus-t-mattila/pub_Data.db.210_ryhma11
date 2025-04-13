@@ -2,7 +2,7 @@ import { exec } from "child_process";
 import dotenv from "dotenv";
 import { registerAdmin } from "../controllers/admin.js";
 
-dotenv.config({path:'../../.env'});
+dotenv.config({path:'../.env'});
 
 const PG_USER = process.env.DB_USER || "postgres";
 const PG_HOST = process.env.DB_HOST || "localhost";

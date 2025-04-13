@@ -7,7 +7,7 @@ Tietokannan alustamista varten tulee varmistaa, että PostgreSQL-palvelin on kä
 Oletuksena projekti käyttää seuraavia arvoja, mutta niitä voi muuttaa luomalla .env-tiedoston backend-kansioon ja vaihtamalla arvot omaa ympäristöä vastaaviksi:
 
 
-**oletetaan että .env -tiedosto tulee sijoittaa backend -hakemistoon -> tie-kannassa ao.**
+**mikäli käytetään ympäristömuuttujia sijoitetaan .env tiedosto backendin juureen.**
 ```env
 DB_USER=ksmama
 DB_PASSWORD=******
