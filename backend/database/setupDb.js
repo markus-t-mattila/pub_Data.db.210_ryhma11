@@ -2,11 +2,14 @@ import { exec } from "child_process";
 import dotenv from "dotenv";
 import { registerAdmin } from "../controllers/admin.js";
 
-dotenv.config();
+dotenv.config({path:'../../.env'});
 
 const PG_USER = process.env.DB_USER || "postgres";
 const PG_HOST = process.env.DB_HOST || "localhost";
-const PG_DB = "central_divari";
+const PG_PASSWORD = process.env.DB_PASSWORD || "";
+const PG_DB = process.env.DB_NAME || "central_divari";
+const RESET_DB = process.env.RESET_DB || "backend/database/sql_statements/reset_db.sql";
+const INIT_DB = process.env.INIT_DB || "backend/database/sql_statements/init_db.sql";
 
 
 const CREATE_USER_COMMAND = `
@@ -15,8 +18,8 @@ psql -h ${PG_HOST} -U ${PG_USER} -W -c "GRANT ALL PRIVILEGES ON DATABASE ${PG_DB
 `;
 
 // Komennot tietokannan alustamiseen
-const RESET_DB_COMMAND = `psql -h ${PG_HOST} -U ${PG_USER} -f backend/database/sql_statements/reset_db.sql`;
-const INIT_DB_COMMAND = `psql -h ${PG_HOST} -U ${PG_USER} -f backend/database/sql_statements/init_db.sql`;
+const RESET_DB_COMMAND = `PGPASSWORD=${PG_PASSWORD} psql -h ${PG_HOST} -U ${PG_USER} -f ${RESET_DB}`;
+const INIT_DB_COMMAND = `PGPASSWORD=${PG_PASSWORD} psql -h ${PG_HOST} -U ${PG_USER} -f ${INIT_DB}`;
 
 console.log("Resetoidaan tietokanta...");
 

@@ -1,7 +1,7 @@
 import axios from "axios";
 
-export const BASE_URL = "http://localhost:3001";
-
+export const BASE_URL = "http://localhost:3001"; // kommentoi rivi pois tie.kannat ympäristössä
+//export const BASE_URL = "/~ksmama/api/"; // deploymentissa
 
 export const api = axios.create({
     baseURL: BASE_URL,

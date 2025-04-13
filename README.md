@@ -6,9 +6,20 @@ Tietokannan alustamista varten tulee varmistaa, että PostgreSQL-palvelin on kä
 
 Oletuksena projekti käyttää seuraavia arvoja, mutta niitä voi muuttaa luomalla .env-tiedoston backend-kansioon ja vaihtamalla arvot omaa ympäristöä vastaaviksi:
 
+
+**oletetaan että .env tiedosto projektin juuressa -> tie-kannassa ao.**
 ```env
-DB_USER=postgres
+DB_USER=ksmama
+DB_PASSWORD=******
 DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=ksmama
+PORT=3000
+RESET_DB=/home/ksmama/Data.db.210_ryhma11/backend/database/sql_statements/ksmama_reset_db.sql
+INIT_DB=/home/ksmama/Data.db.210_ryhma11/backend/database/sql_statements/ksmama_init_db.sql
+BACKEND_URL=http://localhost:3000
+BASENAME=/~ksmama
+BASE_URL=/~ksmama/api/
 ```
 
 ### Alustuskomento
@@ -20,6 +31,23 @@ node backend/database/setupDb.js
 ```
 
 ## Frontendin ja backendin buildaus ja käynnistäminen:
+
+frontissa mikäli sovellusta ei ajeta suoraan juuri hakemistosta on muistettava lisätä frontin `package.json` tiedostoon "homepage"
+
+
+##### deployatussa versiossa tämä määritetty seuraavasti
+```
+{
+  "name": "client",
+  "version": "0.1.0",
+  "private": true,
+  "homepage": "/~ksmama",
+  "dependencies": {
+    ...
+    ...
+  }
+}
+```
 
 ### Frontend (React)
 
@@ -56,3 +84,6 @@ Käynnistä palvelin:
 ```
 npm start
 ```
+
+### Deployment:
+Deployment-versiossa palvelinta ylläpidetään ja hallitaan PM2-kirjastolla, joka vastaa automaattisesta uudelleenkäynnistyksestä, lokien hallinnasta ja prosessien jatkuvasta valvonnasta.

@@ -20,10 +20,13 @@ import SingleBook from "./pages/SingleBook";
 import BookForm from "./pages/BooksForm";
 import AddStore from "./pages/AddStore"
 
+const BASENAME =  ""  // tie kannat -> kommentoi tämä pois
+//const BASENAME=/~ksmama // tie.tkannat deploymentissa
+
 export default function App() {
 
   return (
-    <Router>
+    <Router basename = {BASENAME}>
       <Routes>
         {/* Käyttäjän reitit wrappaamalla ne `AuthProvider`:iin */}
         <Route

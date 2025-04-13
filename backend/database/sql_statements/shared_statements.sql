@@ -1,6 +1,7 @@
 -- shared statements
 
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- ei oikeutta käyttää tie-kannat palvelussa :(
+-- CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- book condition
 CREATE TYPE condition_enum AS ENUM (
