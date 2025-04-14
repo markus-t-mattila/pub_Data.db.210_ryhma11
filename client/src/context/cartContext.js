@@ -74,6 +74,12 @@ export const CartProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('cartItems', JSON.stringify(cartItems));
   }, [cartItems]);
+  
+  useEffect(() => {
+    if (shippingCost.totalCost === 0 && cartItems.length !== 0) {
+      fetchShippingCost(cartItems);
+    }
+  }, [cartItems, shippingCost.total]);
 
   const addToCart = (book) => {
     const updatedCart = [...cartItems, book];

@@ -12,6 +12,8 @@ export const searchBooks = async (req, res) => {
     ),
     matches AS (
       SELECT
+        b.id AS book_id,
+        t.id AS title_id,
         t.isbn,
         t.name,
         t.writer,

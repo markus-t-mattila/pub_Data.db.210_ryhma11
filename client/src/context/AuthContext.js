@@ -14,6 +14,7 @@ export function AuthProvider({ children }) {
     // onko jo talletettu esim. "isLoggedIn=true"
     const storedLogin = localStorage.getItem("loggedIn");
     if (storedLogin === "true") {
+      login();
       setIsLoggedIn(true);
     }
   }, []);
@@ -39,7 +40,7 @@ export function AuthProvider({ children }) {
     try {
       const info = await getMyInfo();  // Hakee backendiltä kirjautuneen käyttäjän tiedot
       setUserInfo(info.data);
-      setIsLoggedIn(true);
+      setIsLoggedIn(!!info.data);
       localStorage.setItem("loggedIn", "true");
       console.log('info:', info);
       //setIsLoggedIn(true);
