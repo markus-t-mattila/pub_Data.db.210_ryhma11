@@ -25,7 +25,7 @@ const pool = new Pool({
   port: process.env.DB_PORT || 5432,                      // Portti (PostgreSQL-oletus: 5432)
 
   // Poolin hallintaan liittyvät asetukset
-  max: 20,                        // Enintään 10 samanaikaista yhteyttä poolissa
+  max: 20,                        // Enintään 20 samanaikaista yhteyttä poolissa
   idleTimeoutMillis: 10000,      // Vapautetaan yhteys, jos sitä ei ole käytetty 10 sekuntiin
   connectionTimeoutMillis: 2000, // Odotetaan max 2 sekuntia ennen kuin yhteydenotto epäonnistuu
   statement_timeout: 5000        // Katkaise yksittäinen kysely, jos se kestää yli 5 sekuntia
