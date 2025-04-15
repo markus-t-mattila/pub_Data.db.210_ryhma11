@@ -299,6 +299,37 @@ export const releaseExpiredReservations = async () => {
           SET status = 'SOLD', purchase_id = $1, modified_at = NOW()
           WHERE id = $2
         `, [purchaseId, book.book_id]);
+        
+        // Haetaan kirjan store_id
+        const storeResult = await client.query(`
+          SELECT store_id
+          FROM book
+          WHERE id = $1
+        `, [book.book_id]);
+        
+        if (storeResult.rowCount > 0) {
+          const storeId = storeResult.rows[0].store_id;
+        
+          // Tarkistetaan onko storella oma skeema
+          const schemaResult = await client.query(`
+            SELECT schema_name
+            FROM store_schema_mapping
+            WHERE store_id = $1
+          `, [storeId]);
+        
+          if (schemaResult.rowCount > 0) {
+            const schemaName = schemaResult.rows[0].schema_name;
+        
+            // Päivitetään kirjan tiedot myös sen omistavan divarin omaan skeemaan
+            const schemaQuery = `
+              UPDATE ${schemaName}.book
+              SET status = 'SOLD', purchase_id = $1, modified_at = NOW()
+              WHERE id = $2
+            `;
+        
+            await client.query(schemaQuery, [purchaseId, book.book_id]);
+          }
+        }
   
         // Lisätää shipment_item -rivi
         await client.query(`

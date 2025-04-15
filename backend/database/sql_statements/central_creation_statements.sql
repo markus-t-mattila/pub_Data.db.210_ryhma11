@@ -2,7 +2,6 @@
 
 -- book type
 CREATE TABLE IF NOT EXISTS book_type (
-  -- id    UUID    PRIMARY KEY DEFAULT uuid_generate_v4(),
   name  TEXT    UNIQUE NOT NULL
 );
 
@@ -10,11 +9,16 @@ INSERT INTO book_type (name) VALUES
   ('HARDCOVER'),
   ('PAPERBACK'),
   ('CARTOON'),
-  ('OTHER');
+  ('OTHER'),
+  ('ROMANCE'),
+  ('HISTORY'),
+  ('CRIME'),
+  ('HUMOR'),
+  ('GUIDE');
+
 
 -- book genre / class
 CREATE TABLE IF NOT EXISTS book_class (
-  -- id    UUID    PRIMARY KEY DEFAULT uuid_generate_v4(),
   name  TEXT    UNIQUE NOT NULL
 );
 
@@ -22,7 +26,8 @@ INSERT INTO book_class (name) VALUES
   ('FICTION'),
   ('NONFICTION'),
   ('COMIC'),
-  ('OTHER');
+  ('OTHER'),
+  ('NOVEL');
 
 CREATE TABLE IF NOT EXISTS customer (
   id              UUID              PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -72,7 +77,7 @@ CREATE TABLE IF NOT EXISTS title (
   name          TEXT            NOT NULL,
   writer        TEXT            NOT NULL,
   publisher     TEXT            NOT NULL,
-  year          NUMERIC(4)      NOT NULL,
+  year          NUMERIC(4),
   weight        NUMERIC(6)      NOT NULL,
   type          TEXT            NOT NULL,
   class         TEXT            NOT NULL,

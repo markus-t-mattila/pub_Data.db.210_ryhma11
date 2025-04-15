@@ -5,10 +5,15 @@ CREATE TABLE IF NOT EXISTS d1_divari.book_type (
     name TEXT UNIQUE NOT NULL
 );
 INSERT INTO d1_divari.book_type (name) VALUES
-    ('HARDCOVER'),
-    ('PAPERBACK'),
-    ('CARTOON'),
-    ('OTHER');
+  ('HARDCOVER'),
+  ('PAPERBACK'),
+  ('CARTOON'),
+  ('OTHER'),
+  ('ROMANCE'),
+  ('HISTORY'),
+  ('CRIME'),
+  ('HUMOR'),
+  ('GUIDE');
 
 -- book genre / class
 CREATE TABLE IF NOT EXISTS d1_divari.book_class (
@@ -18,7 +23,8 @@ INSERT INTO d1_divari.book_class (name) VALUES
     ('FICTION'),
     ('NONFICTION'),
     ('COMIC'),
-    ('OTHER');
+    ('OTHER'),
+    ('NOVEL');
 
 
 CREATE TABLE IF NOT EXISTS d1_divari.title (
@@ -27,7 +33,7 @@ CREATE TABLE IF NOT EXISTS d1_divari.title (
     name        TEXT            NOT NULL,
     writer      TEXT            NOT NULL,
     publisher   TEXT            NOT NULL,
-    year        NUMERIC(4)      NOT NULL,
+    year        NUMERIC(4),
     weight      NUMERIC(6)      NOT NULL,
     type        TEXT            NOT NULL,
     class       TEXT            NOT NULL,
