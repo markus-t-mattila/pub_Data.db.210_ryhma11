@@ -22,6 +22,7 @@ export const searchBooks = async (req, res) => {
         t.type,
         t.class,
         b.sale_price,
+        b.status AS status,
         (
           SELECT count(*)
           FROM search_terms st
@@ -37,7 +38,7 @@ export const searchBooks = async (req, res) => {
     )
     SELECT *
     FROM matches
-    WHERE matches_full_word > 0 OR matches_partial > 0
+    WHERE (matches_full_word > 0 OR matches_partial > 0) AND status = 'AVAILABLE'
     ORDER BY matches_full_word DESC, matches_partial DESC;
   `;
   try {
