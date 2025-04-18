@@ -18,6 +18,9 @@ PORT=3000
 RESET_DB=/home/ksmama/Data.db.210_ryhma11/backend/database/sql_statements/ksmama_reset_db.sql
 INIT_DB=/home/ksmama/Data.db.210_ryhma11/backend/database/sql_statements/ksmama_init_db.sql
 BACKEND_URL=http://localhost:3000
+SESSION_SECRET=oma_sessio_salasana
+CENTRAL_ADMIN_PASSWORD=divariadmin
+EXTERNAL_ADMIN_PASSWORD=divariadmin2
 ```
 
 ### Alustuskomento

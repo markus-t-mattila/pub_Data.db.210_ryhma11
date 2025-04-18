@@ -40,7 +40,7 @@ app.use((req, res, next) => {
 
 // KÄRKEEN, ennen reittien määrittelyä:
 app.use(session({
-  secret: 'oma_sessio_salasana',
+  secret: process.env.SESSION_SECRET || 'oma_sessio_salasana',
   resave: false,
   saveUninitialized: false,
   cookie: {

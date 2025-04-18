@@ -83,14 +83,14 @@ const createAdmins = async () => {
   const centralAdminRequest = {
     body: {
       email: "central@admin.dev",
-      password: "divariadmin",
+      password: process.env.CENTRAL_ADMIN_PASSWORD || "divariadmin",
       is_central: true,
     }
   }
   const externalAdminRequest = {
     body: {
       email: "external@admin.dev",
-      password: "divariadmin2",
+      password: process.env.EXTERNAL_ADMIN_PASSWORD || "divariadmin2",
       is_central: false,
       storeIds: [
         "a1111111-1111-1111-1111-111111111111",
